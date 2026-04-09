@@ -125,7 +125,7 @@ TRANSFER ANNOUNCEMENT TEMPLATE:
 Examples:
 - "Ich verbinde Sie mit unserem Vertriebsteam. Einen Moment bitte."
 - "Ich leite Sie an den technischen Support weiter, der kann Ihnen
-  bei Ihrem EMMA-Problem direkt helfen. Einen Augenblick."
+  bei Ihrem Anliegen direkt helfen. Einen Augenblick."
 - "Für Ihr Anliegen verbinde ich Sie mit einem Kollegen. Einen
   Moment bitte."
 ```

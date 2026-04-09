@@ -54,35 +54,34 @@ Structure KB content as self-contained atomic facts. Each entry should be answer
 
 **WRONG (paragraph format):**
 ```
-EMMA ist eine kognitive RPA-Software von WIANCO OTT Robotics, die
-repetitive Desktop-Prozesse durch visuelle Bildschirmerkennung automatisiert.
-Sie nutzt Shape Recognition und OCR, arbeitet komplett on-premise ohne
-Cloud-Anbindung, ist DSGVO-konform und kann von Fachanwendern nach einem
-zweitägigen Training im No-Code Studio selbst konfiguriert werden. Die
-Lizenzen kosten ab 490 Euro netto pro Monat.
+AcmeSoft ist eine Projektmanagement-Software, die Teams bei der Planung
+und Durchfuehrung komplexer Projekte unterstuetzt. Sie bietet Gantt-Charts,
+Kanban-Boards, Zeiterfassung und Team-Kommunikation in einer Plattform,
+laeuft als Cloud- oder On-Premise-Loesung, ist DSGVO-konform und kann nach
+einer einstuendigen Einrichtung sofort genutzt werden. Lizenzen starten
+ab vierhundertneunzig Euro netto pro Monat.
 ```
 
 **RIGHT (atomic facts):**
 ```
-## Was ist EMMA?
-EMMA ist eine kognitive KI-Software, die repetitive Desktop-Aufgaben
-automatisiert, indem sie den Bildschirm visuell erkennt — wie ein
-Mitarbeiter, der auf den Monitor schaut.
+## Was ist AcmeSoft?
+AcmeSoft ist eine Projektmanagement-Software, mit der Teams komplexe
+Projekte planen und durchfuehren koennen.
 
-## Wie funktioniert EMMA technisch?
-EMMA nutzt Shape Recognition und OCR zur Bildschirmerkennung. Sie braucht
-keine APIs und keine Programmierkenntnisse.
+## Welche Funktionen bietet AcmeSoft?
+AcmeSoft bietet Gantt-Charts, Kanban-Boards, Zeiterfassung und
+Team-Kommunikation in einer Plattform.
 
-## Wo läuft EMMA?
-EMMA läuft komplett auf dem eigenen Rechner, ohne Cloud und ohne Internet.
-Daten verlassen das Unternehmen nicht.
+## Wo laeuft AcmeSoft?
+AcmeSoft gibt es als Cloud-Loesung oder als On-Premise-Installation.
+Beide Varianten sind DSGVO-konform.
 
-## Was kostet eine EMMA-Lizenz?
-Eine EMMA-PC-Lizenz kostet ab vierhundertneunzig Euro netto pro Monat.
+## Was kostet eine AcmeSoft-Lizenz?
+Eine AcmeSoft-Lizenz kostet ab vierhundertneunzig Euro netto pro Monat.
 
-## Wie schnell ist EMMA einsatzbereit?
-Nach einem zweitägigen Training können Fachanwender eigene Workflows
-im EMMA Studio erstellen. Keine IT-Kenntnisse nötig.
+## Wie schnell ist AcmeSoft einsatzbereit?
+Nach einer einstuendigen Einrichtung kann Ihr Team sofort loslegen.
+Keine IT-Kenntnisse noetig.
 ```
 
 ### Why This Works Better
@@ -157,7 +156,7 @@ Nebenwirkungen darf der Agent NICHT beantworten.
 ### Chunking Rules
 
 1. **One topic per chunk** — never combine opening hours and pricing
-2. **Include the question in the chunk** — "Was kostet EMMA?" as heading helps retrieval
+2. **Include the question in the chunk** — "Was kostet [Produkt]?" as heading helps retrieval
 3. **Use the caller's vocabulary** — "Rezept vorbestellen" not "Medikationsvororder"
 4. **Duplicate key terms** — If callers say both "Termin" and "Behandlung" for the same thing, include both
 5. **No cross-references** — Every chunk must be self-contained. Don't write "Siehe auch Preisliste"

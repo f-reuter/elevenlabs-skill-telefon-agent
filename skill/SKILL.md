@@ -15,12 +15,14 @@ ElevenLabs Conversational AI uses LLMs (Claude, GPT) as the reasoning engine, wi
 
 | Task | Reference File |
 |------|---------------|
-| Write a subagent prompt | `references/prompt-template.md` |
+| Write a subagent prompt (10-section schema) | `references/prompt-template.md` |
+| Design the first message | `references/prompt-template.md` (First Message Design section) |
 | See a complete worked example | `references/example-complete-prompt.md` |
-| Design guardrails | `references/guardrails.md` |
-| Optimize output for TTS | `references/output-rules.md` |
+| Design guardrails (topic, behavioral, privacy) | `references/guardrails.md` |
+| Optimize output for TTS / voice naturalness | `references/output-rules.md` |
+| Voice selection & prosody tuning | `references/output-rules.md` (Sections 8-9) |
 | Design a multi-agent workflow | `references/workflow-design.md` |
-| Configure ElevenLabs parameters | `references/elevenlabs-config.md` |
+| Configure ElevenLabs parameters & MCP tools | `references/elevenlabs-config.md` |
 | Test and iterate | `references/testing.md` |
 | Edit an agent via PATCH API / audit before deploy | `references/agent-api-operations.md` |
 | Design and structure knowledge bases (RAG) | `references/rag-strategy.md` |
@@ -219,3 +221,46 @@ Before finalizing any agent or workflow, verify against these common failures:
 | Written German ("z.B.", "€/Monat") | Spell out for TTS |
 | Filler phrases ("Gerne!", "Gute Frage") | Ban explicitly in output rules |
 | No data confirmation | Always repeat back names, numbers |
+| Timeline promises ("bis morgen") | Never promise timelines unless in KB |
+| Stacked apologies | One acknowledgment, then action |
+| No recording consent | Add consent notice to first message or pre-greeting |
+
+---
+
+## Deployment Checklist — End to End
+
+After building all agents and testing, follow this sequence to go live:
+
+### Phase 1: Create Agents
+- [ ] Create each subagent via `create_agent` MCP tool or ElevenLabs Dashboard
+- [ ] Verify each agent's config with `get_agent` and the audit checklist in `references/agent-api-operations.md`
+- [ ] Upload knowledge bases via `add_knowledge_base_to_agent`
+- [ ] Assign correct KBs to correct agents (never give every agent every KB)
+
+### Phase 2: Configure Workflow
+- [ ] Connect subagents into workflow (transitions, conditions, context payloads)
+- [ ] Set `prevent_subagent_loops = true` in workflow JSON
+- [ ] Verify every path terminates (no dead ends)
+- [ ] Verify human escalation exists in every path
+- [ ] Configure ASR keywords per subagent (domain-specific terms)
+- [ ] Set turn detection per subagent type (eager/normal/relaxed)
+
+### Phase 3: Voice & Recording
+- [ ] Select and test voice with actual first message and error recovery phrases
+- [ ] Configure voice parameters (stability, similarity, speed) per subagent type
+- [ ] Configure recording consent (pre-greeting or first message)
+- [ ] Enable `record_voice = true` for quality review
+
+### Phase 4: Test (in this order)
+- [ ] Unit test each subagent in isolation
+- [ ] Transition test each agent pair
+- [ ] End-to-end scenario tests (every workflow path)
+- [ ] Adversarial tests (manipulation, abuse, data exfiltration)
+- [ ] Test with different speaking speeds, accents, background noise
+
+### Phase 5: Go Live
+- [ ] Assign phone number to workflow entry point
+- [ ] Place test call to the live number from an external phone
+- [ ] Verify call recording and webhook logging work
+- [ ] Set up conversation analysis schedule (weekly for first 2 months)
+- [ ] Document escalation contacts with availability hours

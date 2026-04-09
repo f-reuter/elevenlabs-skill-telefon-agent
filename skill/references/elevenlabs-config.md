@@ -123,18 +123,17 @@ Never let the caller wait more than 5 seconds in silence during a tool call.
 Use structured markdown:
 
 ```markdown
-# Product: EMMA Standard License
-## Price: 490 EUR/month (net)
+# Product: [Product Name] Standard License
+## Price: [X] EUR/month (net)
 ## Included:
-- 3 workstations
-- 1 year updates
-- Standard support (Mon-Fri 8-18)
+- [Feature 1]
+- [Feature 2]
+- [Support level] (Mon-Fri [hours])
 ## NOT included:
-- On-site support
-- Custom integrations
-- Weekend/holiday support
-## Upsell path: EMMA Premium (890 EUR/month) adds 24/7 support + custom integrations
-## Common objection: "Too expensive" → Compare to cost of one FTE (40-50k/year)
+- [Excluded feature 1]
+- [Excluded feature 2]
+## Upsell path: Premium ([Y] EUR/month) adds [additional features]
+## Common objection: "Too expensive" → [Counter-argument from sales playbook]
 ```
 
 ### Knowledge Base Assignment Matrix

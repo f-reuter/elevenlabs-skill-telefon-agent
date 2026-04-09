@@ -25,7 +25,7 @@ The PATCH endpoint **merges** changes — send only the fields you want to chang
   "conversation_config": {
     "asr": {
       "quality": "high",
-      "keywords": ["Termin", "Rezept", "EMMA", "Lizenznummer"]
+      "keywords": ["[domain-specific]", "[product-name]", "[key-terms]"]
     },
     "turn": {
       "turn_timeout": 7.0,
@@ -128,7 +128,7 @@ curl -X PATCH "https://api.elevenlabs.io/v1/convai/agents/{agent_id}" \
     "conversation_config": {
       "asr": {
         "quality": "high",
-        "keywords": ["EMMA", "WIANCO", "Lizenznummer", "Mandantennummer"]
+        "keywords": ["AcmeSoft", "Dashboard", "Lizenznummer", "Kundennummer"]
       }
     }
   }'
@@ -141,7 +141,7 @@ curl -X PATCH "https://api.elevenlabs.io/v1/convai/agents/{agent_id}" \
   -H "Content-Type: application/json" \
   -H "xi-api-key: $ELEVENLABS_API_KEY" \
   -d '{
-    "name": "Hof-Apotheke Empfang v2",
+    "name": "AcmeSoft Empfang v2",
     "tags": ["production", "pharmacy", "german"],
     "conversation_config": {
       "agent": {
@@ -196,7 +196,7 @@ curl -X PATCH "https://api.elevenlabs.io/v1/convai/agents/{agent_id}" \
 | `eleven_multilingual_v2` | Moderate | Excellent | 29 | **Default for German production** |
 | `eleven_v3` | Variable | Best | 80+ | Premium quality, experimental |
 
-**NeoPhone default:** `eleven_multilingual_v2` — best German pronunciation quality. Accept the latency tradeoff.
+**Recommended default:** `eleven_multilingual_v2` — best German pronunciation quality. Accept the latency tradeoff.
 
 ---
 
@@ -229,7 +229,7 @@ curl -X PATCH "https://api.elevenlabs.io/v1/convai/agents/{agent_id}" \
 
 ### Production Defaults
 
-For a German NeoPhone production agent:
+For a German production agent:
 - Stability: **0.55**
 - Similarity Boost: **0.80**
 - Speed: **1.0**

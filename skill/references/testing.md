@@ -63,7 +63,7 @@ Test with different speaking styles, accents, speeds, and background noise condi
 
 | # | Scenario | Expected Behavior |
 |---|----------|-------------------|
-| R1 | Clear sales intent ("Was kostet EMMA?") | Routes to Sales |
+| R1 | Clear sales intent ("Was kostet Ihre Software?") | Routes to Sales |
 | R2 | Clear support intent ("Meine Lizenz funktioniert nicht") | Routes to Support/Verification |
 | R3 | Clear complaint intent ("Ich bin sehr unzufrieden") | Routes to Complaint |
 | R4 | Ambiguous intent ("Ich habe eine Frage zu meiner Rechnung") | Agent asks clarifying question |

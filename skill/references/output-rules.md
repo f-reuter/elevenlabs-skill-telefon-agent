@@ -141,10 +141,10 @@ NUMBER RULES:
 TECHNICAL CONTENT RULES:
 - Never speak URLs, email addresses, file paths, or technical IDs.
   The TTS will read them character by character or mangle them.
-  × "Besuchen Sie w-w-w-punkt-wianco-punkt-de"
+  × "Besuchen Sie w-w-w-punkt-acmesoft-punkt-de"
   ✓ "Ich schicke Ihnen den Link per E-Mail."
 
-  × "Schreiben Sie an support-at-wianco-punkt-de"
+  × "Schreiben Sie an support-at-acmesoft-punkt-de"
   ✓ "Ich leite Ihre Anfrage an unser Support-Team weiter."
 
   × "Ihre Ticket-Nummer ist TICK-zweitausendvierhundertdreiundfünfzig"
@@ -310,3 +310,91 @@ UNKNOWN ANSWER:
 - Some vocabulary differences: "Jänner" not "Januar", "heuer" not "dieses Jahr"
 - Greetings: "Grüß Gott" is standard in professional context
 - Include these in the Language Rules section if deploying for Austrian callers
+
+---
+
+## 8. Voice Naturalness & Prosody
+
+These rules make the agent sound like a real person, not a script reader.
+
+### Pacing & Rhythm
+
+```
+PACING RULES:
+- Short sentences sound more natural at normal-to-fast speed (1.0-1.1).
+- Longer explanations need slightly slower speed (0.9) or must be
+  broken into chunk-and-confirm turns.
+- After asking a question, the natural pause is handled by the
+  turn detection system — do NOT add filler phrases to fill silence.
+- Use sentence breaks to create natural breathing points. Two short
+  sentences sound more human than one long one:
+  × "Ich verbinde Sie jetzt mit dem Vertrieb, der Ihnen alle Details
+    zu unserem Angebot erklaeren kann."
+  ✓ "Ich verbinde Sie mit dem Vertrieb. Die koennen Ihnen alles
+    im Detail erklaeren."
+```
+
+### Tone Matching
+
+```
+TONE RULES:
+- Match the caller's energy level. If the caller is brief and
+  business-like, respond in kind. If the caller is chatty, allow
+  slightly more warmth — but stay within 2 sentences.
+- Never be MORE enthusiastic than the caller. Mismatched energy
+  feels artificial.
+- For bad news (product unavailable, long wait time), lower the
+  tone — use empathetic phrasing first, then the fact:
+  × "Das Produkt ist leider nicht verfuegbar."
+  ✓ "Das verstehe ich. Das Produkt ist aktuell leider nicht auf Lager."
+- After deflecting a blocked topic, ALWAYS redirect with warmth,
+  not just a flat redirect.
+```
+
+### Voice Parameter Relationship to Prompt Style
+
+| Prompt Style | Stability | Similarity | Speed | Why |
+|---|---|---|---|---|
+| Short routing responses | 0.6-0.7 | 0.8 | 1.0-1.1 | Consistent, efficient |
+| Sales/persuasive | 0.4-0.5 | 0.7-0.8 | 1.0 | Needs emotional variation |
+| Empathetic (complaints) | 0.4-0.5 | 0.7 | 0.9 | Slower, warmer, more varied |
+| Data collection | 0.6-0.7 | 0.8 | 1.0 | Consistent, clear |
+| Error recovery phrases | 0.5-0.6 | 0.8 | 0.9 | Calm, reassuring |
+
+### Voice Selection Framework
+
+When choosing a voice for a workflow:
+
+1. **Test with the actual first message** — not generic text. The first 3 seconds define caller perception.
+2. **Test with error recovery phrases** — these are the hardest test for naturalness.
+3. **Test with numbers and spelled-out words** — dates, phone numbers, prices.
+4. **Match voice age to caller expectations** — B2B callers expect a mature voice; consumer hotlines can be younger.
+5. **Match voice gender to brand** — no universal rule, but test both and let stakeholders decide.
+6. **Use the same voice across all subagents** unless the workflow intentionally simulates transfer to a different person.
+7. **Never choose a voice based on the default demo text** — always test with YOUR agent's actual phrases.
+
+---
+
+## 9. Recording Consent
+
+If call recording is active, the caller MUST be informed. Handle this in one of two ways:
+
+### Option A: Pre-greeting (before first_message)
+Configure a pre-greeting audio that plays automatically before the agent speaks:
+```
+"Dieser Anruf wird zu Qualitaetssicherungszwecken aufgezeichnet."
+```
+
+### Option B: First Message Integration
+Include consent notice in the agent's first message:
+```
+"[Company], mein Name ist [Name]. Dieser Anruf wird aufgezeichnet.
+Wie kann ich Ihnen helfen?"
+```
+
+**Rules:**
+- Consent notice must come BEFORE any data collection
+- Keep it short — one sentence maximum
+- If the caller objects to recording, offer an alternative contact method:
+  "[target lang: 'Verstanden. Sie koennen uns auch per E-Mail erreichen.
+  Soll ich Ihnen die Adresse schicken?']"

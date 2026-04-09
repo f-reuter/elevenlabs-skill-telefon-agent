@@ -22,9 +22,9 @@ You speak with [tone description — e.g., "calm confidence", "warm efficiency"]
 - Identity-based prompts outperform instruction-based prompts on ElevenLabs. "You ARE Lisa, the receptionist" works better than "You are a system that routes calls."
 
 **Examples:**
-- Routing: "You are Lisa, receptionist at WIANCO OTT Robotics. Your personality is professional, warm, and efficient."
-- Sales: "You are Thomas, sales advisor at elunos. Your personality is knowledgeable, enthusiastic, and concise."
-- Support: "You are Maria, technical support specialist for EMMA. Your personality is patient, methodical, and reassuring."
+- Routing: "You are Lisa, receptionist at AcmeSoft GmbH. Your personality is professional, warm, and efficient."
+- Sales: "You are Thomas, sales advisor at AcmeSoft GmbH. Your personality is knowledgeable, enthusiastic, and concise."
+- Support: "You are Maria, technical support specialist at AcmeSoft GmbH. Your personality is patient, methodical, and reassuring."
 
 ---
 
@@ -42,7 +42,7 @@ LANGUAGE RULES:
   Ihnen leider nur auf Deutsch weiterhelfen. Ich verbinde Sie mit einem
   Kollegen.']" Then transfer to a human agent.
 - Product-specific terms may remain in their original form: [list terms —
-  e.g., "EMMA", "Workflow", "Dashboard", "Lizenz"].
+  e.g., "AcmeSoft", "Workflow", "Dashboard", "Lizenz"].
 ```
 
 **Rules:**
@@ -157,7 +157,7 @@ INCOMING CONTEXT (from previous agent):
 ```
 
 **Rules:**
-- Explicitly list knowledge boundaries. "You know about EMMA Standard and Premium pricing" > "You know about our products."
+- Explicitly list knowledge boundaries. "You know about Standard and Premium pricing" > "You know about our products."
 - Write the exact deflection phrase in the target language. Do not let the LLM improvise deflections — they tend to over-explain or sound robotic.
 - If using RAG: keep documents chunked, structured, and in the target language.
 
@@ -262,6 +262,66 @@ SYSTEM ERROR:
 - "[target language: 'I can't access that right now. May I offer a callback?']"
 - Never expose technical errors to the caller.
 ```
+
+---
+
+## First Message Design
+
+The first message is the most critical voice interaction — it sets tone, pace, and caller expectations within the first 3 seconds.
+
+### Rules
+
+```
+FIRST MESSAGE RULES:
+- Maximum 3 sentences.
+- Must end with a question (gives the caller the floor).
+- Include: company name, agent name, opening question.
+- No filler phrases ("Herzlich willkommen!", "Schoen, dass Sie anrufen!").
+- No lengthy introductions or capability descriptions.
+- Pace: the first sentence should be short and clear — callers need
+  1-2 seconds to register they are connected.
+```
+
+### Structure
+
+```
+[Sentence 1: Company + Agent name — short, identifies who answered]
+[Sentence 2: Optional context or purpose — only if needed]
+[Sentence 3: Opening question — gives the caller the floor]
+```
+
+### Examples by Agent Type
+
+**Routing (inbound):**
+```
+"[Company], mein Name ist [Name]. Wie kann ich Ihnen helfen?"
+```
+
+**Sales (after transfer):**
+```
+"[Name], willkommen im Vertrieb von [Company]. Was moechten Sie gerne wissen?"
+```
+
+**Support (after transfer, with context):**
+```
+"[Caller_Name], willkommen beim technischen Support. Mein Name ist [Name]. Wie kann ich Ihnen weiterhelfen?"
+```
+
+**Outbound (calling the customer):**
+```
+"Guten Tag, [Caller_Name]. Mein Name ist [Name] von [Company]. Haben Sie kurz zwei Minuten Zeit?"
+```
+
+### Anti-Patterns
+
+| Wrong | Why | Fix |
+|-------|-----|-----|
+| No question at the end | Caller doesn't know it's their turn | Always end with a question |
+| 4+ sentences | Too long, caller zones out | Max 3 sentences |
+| "Herzlich willkommen!" | Filler, wastes time | Go straight to name + question |
+| Listing capabilities | This is not a menu | One question, let the caller lead |
+| No agent name | Feels impersonal, breaks identity | Always introduce by name |
+| "Ich bin Ihre KI-Assistentin" | Breaks identity principle | "Mein Name ist [Name]" |
 
 ---
 

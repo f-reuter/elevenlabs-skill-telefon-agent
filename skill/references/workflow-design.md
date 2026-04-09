@@ -267,3 +267,56 @@ Before deploying, verify every item:
 - [ ] Escalation contacts are documented with availability
 - [ ] Knowledge base assignments are documented
 - [ ] Version history is initialized
+
+---
+
+## 6. Agent Transfer — Inheritance Rules
+
+When one subagent transfers to another, certain configuration is inherited from the parent (workflow-level) and certain is controlled by the child (subagent-level).
+
+### Parent (workflow) overrides:
+- Client events configuration
+- TTS/ASR audio format
+- Current language setting
+- Post-call webhooks
+- Conversation analysis settings
+
+### Child (subagent) controls:
+- System prompt
+- First message
+- LLM selection
+- Voice
+- Tools
+- Knowledge base
+
+### Transcript Handling
+
+- Complete conversation history persists across transfers
+- Transfer tool calls are removed from the child's visible history (so the subagent does not see the routing decision)
+- Transfer tool calls ARE preserved in post-call evaluator transcripts (for analysis)
+
+### Transfer Parameters
+
+```json
+{
+  "type": "system",
+  "name": "transfer_to_agent",
+  "parameters": {
+    "agent_number": 1,
+    "condition": "Caller wants technical support",
+    "reason": "Technical issue detected",
+    "delay_ms": 0,
+    "transfer_message": "Ich verbinde Sie mit dem Support.",
+    "enable_transferred_agent_first_message": true
+  }
+}
+```
+
+| Parameter | Type | Purpose |
+|---|---|---|
+| `agent_number` | integer (0-indexed) | Which subagent to transfer to |
+| `condition` | string (required) | When to trigger this transfer |
+| `reason` | string (optional) | Logged for analytics |
+| `delay_ms` | integer (default 0) | Delay before transfer |
+| `transfer_message` | string (optional) | Spoken to caller before transfer |
+| `enable_transferred_agent_first_message` | boolean | Whether the receiving agent speaks its first_message |

@@ -234,3 +234,113 @@ Verify in Next Cycle
 ```
 
 Target cadence: Every 2 weeks for the first 2 months, then monthly.
+
+---
+
+## 7. Post-Call Webhooks — Detailed Reference
+
+### Three Webhook Types
+
+| Type | Payload | Trigger |
+|---|---|---|
+| `post_call_transcription` | Full conversation data + analysis | Every completed call |
+| `post_call_audio` | Base64-encoded MP3 audio | Every completed call (if enabled) |
+| `call_initiation_failure` | Failure reason + metadata | Outbound call fails to connect |
+
+### Transcription Webhook Payload Structure
+
+```json
+{
+  "type": "post_call_transcription",
+  "data": {
+    "agent_id": "...",
+    "conversation_id": "...",
+    "status": "done",
+    "transcript": [
+      {
+        "role": "agent",
+        "message": "Willkommen bei AcmeSoft...",
+        "start_time_ms": 0,
+        "end_time_ms": 3200
+      },
+      {
+        "role": "user",
+        "message": "Ich habe eine Frage...",
+        "start_time_ms": 3500,
+        "end_time_ms": 6800
+      }
+    ],
+    "metadata": {
+      "start_time_unix": 1712345678,
+      "end_time_unix": 1712345800,
+      "call_duration_secs": 122,
+      "cost": { "total_cost_usd": 0.16 },
+      "phone": { "caller_id": "+49...", "called_number": "+49..." },
+      "feedback": { "score": null, "text": null }
+    },
+    "analysis": {
+      "evaluation_results": {},
+      "data_collection_results": {},
+      "call_successful": "yes",
+      "transcript_summary": "Caller asked about pricing..."
+    },
+    "conversation_initiation_client_data": {
+      "dynamic_variables": { "customer_name": "Herr Mueller" }
+    }
+  }
+}
+```
+
+### Call Failure Webhook
+
+```json
+{
+  "type": "call_initiation_failure",
+  "data": {
+    "failure_reason": "busy | no-answer | unknown",
+    "metadata": { "sip_status_code": 486 }
+  }
+}
+```
+
+### HMAC Signature Verification
+
+Webhooks include an `elevenlabs-signature` header. Verify with your shared secret:
+
+**Python:**
+```python
+from elevenlabs import ElevenLabs
+event = ElevenLabs.construct_event(payload, signature, secret)
+```
+
+**JavaScript:**
+```javascript
+import { ElevenLabs } from 'elevenlabs';
+const event = ElevenLabs.constructEvent(payload, signature, secret);
+```
+
+### Retry Behavior
+
+- Must return HTTP 200
+- Auto-disabled after 10+ consecutive failures if last success > 7 days ago or never succeeded
+- HIPAA-compliant: failed webhooks cannot be retried
+
+### IP Whitelisting (for webhook security)
+
+| Region | IPs |
+|---|---|
+| US | 34.67.146.145, 34.59.11.47 |
+| EU | 35.204.38.71, 34.147.113.54 |
+| Asia | 35.185.187.110, 35.247.157.189 |
+| EU Data Residency | 34.77.234.246, 34.140.184.144 |
+| India Data Residency | 34.93.26.174, 34.93.252.69 |
+
+### Audio Webhooks
+
+Delivered via chunked transfer encoding for large files. Configurable independently at workspace and agent levels.
+
+---
+
+## 8. Smart Search — Semantic Conversation Search
+
+Find conversations by keyword OR meaning across all conversation history (semantic search). Available in the ElevenLabs Dashboard and via API. Use this to find patterns that keyword search misses — e.g., search for "frustrated caller" finds conversations where the caller expressed frustration even without using that exact word.

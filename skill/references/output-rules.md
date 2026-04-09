@@ -398,3 +398,65 @@ Wie kann ich Ihnen helfen?"
 - If the caller objects to recording, offer an alternative contact method:
   "[target lang: 'Verstanden. Sie koennen uns auch per E-Mail erreichen.
   Soll ich Ihnen die Adresse schicken?']"
+
+---
+
+## 10. Text Normalization Modes
+
+ElevenLabs offers two modes for converting numbers/abbreviations to spoken form:
+
+### Mode A: `system_prompt` (default)
+The LLM writes out numbers as words based on prompt instructions (our OUTPUT RULES Section 3). No added latency. Occasional failures when the LLM forgets.
+
+### Mode B: `elevenlabs`
+Normalizes AFTER LLM generation, BEFORE TTS. More reliable — catches cases the LLM misses. Adds minor latency. Preserves natural transcript formatting (digits in transcript, words in speech).
+
+**Recommendation:** Use `elevenlabs` mode for production German agents. Set in agent config:
+```json
+{
+  "conversation_config": {
+    "tts": {
+      "text_normalization": "elevenlabs"
+    }
+  }
+}
+```
+
+Keep the OUTPUT RULES in the prompt as a primary layer. The `elevenlabs` normalization acts as a safety net.
+
+---
+
+## 11. Eleven v3 Conversational — Expressive Mode
+
+The v3 TTS model enables context-aware expressiveness:
+
+### Audio Tags
+The LLM can output tags that control delivery:
+- `[laughs]`, `[whispers]`, `[sighs]`, `[slow]`, `[excited]`
+- Tags affect approximately 4-5 words after the tag
+- Then delivery returns to normal
+
+### Configuration
+Define up to 20 suggested audio tags per agent. The LLM uses them contextually — no need to hard-code in prompts.
+
+### When to Use v3 vs Flash v2.5
+
+| Model | Latency | Expressiveness | Best For |
+|---|---|---|---|
+| `eleven_flash_v2_5` | ~75ms TTFB | Low | High-volume routing, simple FAQ |
+| `eleven_multilingual_v2` | ~200ms | Medium | **Default for German production** |
+| `eleven_v3` | Variable | High | Premium customer experience, sales, complaint handling |
+
+### Limitation
+v3 does NOT preserve Professional Voice Clone (PVC) characteristics well. Use Flash v2 or multilingual v2 for cloned voices.
+
+### Tool Call Sounds
+New feature: play audio feedback while tools execute, reducing perceived latency.
+```json
+{
+  "tool_call_sound": {
+    "enabled": true,
+    "sound_type": "typing"
+  }
+}
+```

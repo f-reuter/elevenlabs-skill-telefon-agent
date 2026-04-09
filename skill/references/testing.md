@@ -225,3 +225,63 @@ These scenarios specifically target guardrail boundaries. Every deployed agent M
 - [ ] Guardrail violations flagged and investigated immediately
 - [ ] Knowledge base updated when new questions appear repeatedly
 - [ ] Prompt adjustments based on real-world conversation patterns
+
+---
+
+## 6. Automated Testing Framework
+
+ElevenLabs supports three automated test types. Use these alongside manual call testing.
+
+### Test Types
+
+| Type | What It Tests | When to Use |
+|---|---|---|
+| `llm` | Evaluates agent responses against expected output | After prompt changes — does the agent still answer correctly? |
+| `tool` | Verifies correct tool calls (name, params) | After tool/webhook changes — does the agent call the right tool? |
+| `simulation` | Full conversation simulation with configurable scenarios | Pre-deployment — does the full flow work end-to-end? |
+
+### Simulation Test Configuration
+
+```json
+{
+  "test_type": "simulation",
+  "simulation_scenario": "Caller wants to schedule an appointment for next Wednesday. They are an existing patient named Mueller.",
+  "simulation_max_turns": 12,
+  "expected_outcome": "Agent collects name, date preference, and reason for visit, then confirms and closes."
+}
+```
+
+### Test Organization
+
+- Group tests into folders by agent and test category
+- Run tests after every prompt change, KB update, or config modification
+- Track pass/fail rates over time to detect regression
+
+### Recommended Test Coverage per Agent
+
+| Category | Min Tests | Focus |
+|---|---|---|
+| Happy path | 3 | Standard flow, all steps completed |
+| Edge cases | 5 | Out-of-order info, vague input, topic changes |
+| Guardrail tests | 5 | Manipulation, abuse, blocked topics, data privacy |
+| Tool call tests | 2 per tool | Correct tool, correct parameters |
+| Simulation tests | 3 | Full scenario end-to-end with realistic dialogue |
+
+### Latency Testing
+
+Measure and optimize end-to-end response time:
+
+| Component | Target | How to Measure |
+|---|---|---|
+| STT (speech-to-text) | <500ms | Timestamp delta in conversation logs |
+| LLM reasoning | <1000ms | Time between STT completion and TTS start |
+| TTS (text-to-speech) | <300ms TTFB | First audio byte after LLM response |
+| Total turn time | <2 seconds | Caller silence end → agent first word |
+
+**Optimization levers:**
+- Shorter prompts = faster LLM reasoning
+- Fewer KBs = faster retrieval
+- `eleven_flash_v2_5` = fastest TTS
+- Simpler LLM (Gemini Flash Lite) for routing agents
+- `turn_eagerness: eager` for fast responses
+- `text_normalization: elevenlabs` avoids LLM re-processing

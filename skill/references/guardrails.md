@@ -299,6 +299,72 @@ UNSOLICITED SENSITIVE DATA:
 
 ---
 
+## Guardrails 2.0 — LLM-Based Runtime Guardrails (Enterprise)
+
+ElevenLabs supports LLM-based guardrails that evaluate agent input/output in real-time.
+
+### Configuration
+
+```json
+{
+  "guardrails": [{
+    "prompt": "Block any response that contains medical advice, drug dosage, or treatment recommendations.",
+    "evaluation_model": "gemini-2.5-flash-lite",
+    "execution_mode": "input_and_output"
+  }]
+}
+```
+
+### Execution Modes
+
+| Mode | When It Runs |
+|---|---|
+| `input_only` | Evaluates caller input before the LLM processes it |
+| `output_only` | Evaluates agent response before TTS speaks it |
+| `input_and_output` | Both — most thorough, adds latency |
+
+### Trigger Actions (when guardrail fires)
+
+| Action | Behavior |
+|---|---|
+| `end-call` | Terminates the conversation immediately |
+| `retry-with-feedback` | Re-generates response with injected system feedback (up to 3 retries) |
+| `transfer_to_agent` | Routes to a different subagent |
+| `transfer_to_human` | Escalates to human operator |
+
+### PII Redaction (Enterprise)
+
+Automatic PII detection and redaction in transcripts and audio:
+
+**13 entity categories:** Name, Contact, Personal, Credentials, Web, Organization, Financial, Location, Date, Unique IDs, Medical, plus specialized types.
+
+```json
+{
+  "privacy": {
+    "pii_redaction": {
+      "enabled": true,
+      "entities": ["name.name_given", "contact.phone_number", "financial.credit_card"]
+    }
+  }
+}
+```
+
+- Transcripts: entities replaced with `[ENTITY_NAME]`
+- Audio: entities replaced with bleep sound
+- Webhooks: also undergo redaction
+
+### When to Use Guardrails 2.0 vs. Prompt Guardrails
+
+| Scenario | Use Prompt Guardrails | Use Guardrails 2.0 |
+|---|---|---|
+| Topic blocking | Yes — deflection phrases | Backup layer |
+| Hallucination prevention | Yes — in prompt | Add retry-with-feedback |
+| PII in agent output | Not reliable | Yes — PII redaction |
+| Compliance-critical (healthcare, finance) | Yes AND | Yes — dual layer |
+| Low-latency agents | Yes — no added latency | Avoid input_and_output mode |
+
+---
+
 ## Guardrail Testing Scenarios
 
 For every deployed agent, test these scenarios at minimum:

@@ -184,6 +184,41 @@ curl -X PATCH "https://api.elevenlabs.io/v1/convai/agents/{agent_id}" \
 
 **Key insight:** Subagents within the same workflow need different turn settings. The routing agent should respond quickly (eager). The verification agent must wait patiently while the caller looks up their ID number (relaxed + high spelling patience). Set these per-node in the workflow JSON, not globally.
 
+### Soft Timeout (Silence Filler)
+
+Plays a soft prompt when the caller is silent, BEFORE triggering the full silence end-call.
+
+```json
+{
+  "conversation_config": {
+    "turn": {
+      "soft_timeout_config": {
+        "timeout_seconds": 3.0,
+        "message": "Sind Sie noch da?"
+      }
+    }
+  }
+}
+```
+
+| Parameter | Range | Default | Notes |
+|---|---|---|---|
+| `timeout_seconds` | 0.5–8.0 | -1 (disabled) | Recommended: 3.0s |
+| `message` | 1–200 chars | "Hhmmmm...yeah." | Use target-language prompt |
+
+- Triggers once per turn maximum
+- Can use LLM-generated messages (optional, context window up to 4 messages / 1000 chars)
+- Language overrides supported for multilingual workflows
+
+### Turn Model Versions
+
+| Version | Behavior |
+|---|---|
+| `turn_v2` | Standard turn detection |
+| `turn_v3` | Improved detection — better at distinguishing thinking pauses from end-of-turn |
+
+Set via `turn_model` parameter. Use `turn_v3` for production German agents where callers often pause mid-sentence.
+
 ---
 
 ## 4. TTS Model Selection

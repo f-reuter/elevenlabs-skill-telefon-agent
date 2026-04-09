@@ -273,3 +273,138 @@ When using `create_agent`, the MCP server internally builds this nested config:
 ```
 
 **Note:** The MCP `create_agent` tool does NOT support PATCH updates. To modify an existing agent, use the PATCH API directly via curl (see `agent-api-operations.md`).
+
+---
+
+## 10. Dynamic Variables
+
+Dynamic variables allow you to personalize agent behavior per call. They are injected at conversation start and accessible in the system prompt via `{{variable_name}}`.
+
+### System Variables (automatically available)
+
+| Variable | Purpose |
+|---|---|
+| `system__agent_id` | Unique ID of the initiating agent (stable throughout) |
+| `system__current_agent_id` | Active agent ID (changes after transfers) |
+| `system__caller_id` | Caller's phone number (voice only) |
+| `system__called_number` | Destination phone number (voice only) |
+| `system__call_duration_secs` | Current call duration in seconds |
+| `system__time_utc` | Current time in ISO format |
+| `system__time` | Current time in specified timezone (human-readable) |
+| `system__timezone` | User-provided timezone |
+| `system__conversation_id` | Platform unique conversation identifier |
+| `system__call_sid` | Twilio Call SID (Twilio only) |
+| `system__agent_turns` | Total conversation turns for agent |
+| `system__current_agent_turns` | Agent turns (resets on transfer) |
+| `system__current_subagent_turns` | Subagent turns (resets on workflow transition) |
+| `system__is_text_only` | Boolean for text-only mode |
+| `system__conversation_history` | JSON-serialized full conversation history |
+
+### Custom Variables
+
+Define in agent config and reference in prompts:
+```
+System prompt: "The caller's name is {{customer_name}} from {{company}}."
+```
+
+### Secret Variables
+
+Prefix with `secret__` to ensure they are ONLY used in dynamic variable headers and NEVER sent to the LLM provider. Critical for auth tokens and private IDs.
+
+### URL Parameter Passing (for widget/embed)
+
+Two methods:
+- Base64 JSON: `?vars=eyJ1c2VyX25hbWUiOiJKb2huIn0=`
+- Individual: `?var_user_name=John&var_account_type=premium`
+
+### Batch Calling Variables
+
+Upload CSV/XLS with mandatory `phone_number` column. Additional columns become dynamic variables per call (e.g., `user_name`, `company`).
+
+**Supported data types:** String, number, and boolean only.
+
+---
+
+## 11. System Tools Reference
+
+| Tool | Purpose | When to Use |
+|---|---|---|
+| `end_call` | Terminate the conversation | After resolution or max turns |
+| `transfer_to_agent` | Transfer to another subagent in workflow | Intent routing, escalation |
+| `transfer_to_number` | Transfer to external phone number | Human escalation |
+| `play_keypad_touch_tone` | Generate DTMF tones | IVR navigation, extension dialing |
+| `skip_turn` | Skip agent response without generating output | When caller is still speaking |
+| `language_detection` | Detect caller's language automatically | Multilingual entry points |
+
+### DTMF (play_keypad_touch_tone)
+
+Parameters: `dtmf_tones` (string: 0-9, *, #, w=0.5s pause, W=1s pause), `reason` (optional). Works only on Twilio or SIP trunk calls. Use case: navigating third-party IVR systems.
+
+### Transfer to Number — Three Modes
+
+| Mode | Behavior | Provider |
+|---|---|---|
+| `conference` (default) | Agent joins conference, then exits | All |
+| `blind` | Direct transfer without warm message | Twilio native only |
+| `sip_refer` | SIP REFER protocol transfer | SIP trunk only |
+
+Parameters: `transfer_number`, `client_message` (spoken to caller), `agent_message` (context for receiving agent), `reason`, `post_dial_digits` (DTMF for extensions).
+
+---
+
+## 12. LLM Model Selection for Voice Agents
+
+| Model | Latency | Accuracy | Best For |
+|---|---|---|---|
+| Gemini 2.5 Flash Lite | Ultra-low | Good | Simple routing, FAQ, high-volume |
+| GPT-4o | Low-medium | Very good | Balanced latency + accuracy |
+| GLM 4.5 Air | Low | Good | Cost-effective general use |
+| Claude Sonnet 4/4.5 | Medium | Excellent | Complex reasoning, nuanced judgment |
+| Claude Opus | Higher | Best | Enterprise logic, compliance-critical |
+
+**Rule of thumb:** Use the fastest model that can handle the task. Routing agents need speed, not reasoning power. Support agents with complex troubleshooting need accuracy.
+
+---
+
+## 13. Phone Number Setup
+
+### Twilio Native Integration
+
+1. Navigate to Phone Numbers tab in ElevenAgents
+2. Provide: Label, Phone Number, Twilio Account SID, Twilio Auth Token
+3. System auto-detects capabilities: purchased numbers = inbound + outbound; verified caller IDs = outbound only
+4. Assign agent for inbound calls from dropdown
+
+### SIP Trunk Integration
+
+Supported providers: Twilio Elastic SIP Trunking, Telnyx, DIDWW, standard SIP.
+TLS + SRTP encryption supported.
+
+### Batch Calling API
+
+```
+POST /v1/convai/batch-calling
+```
+Upload CSV with `phone_number` column + custom variable columns. Can send immediately or schedule.
+
+---
+
+## 14. Enterprise Features
+
+### Data Residency
+Regions: US, EU, India. Enterprise-only. Set via `ELEVENLABS_API_RESIDENCY` env variable.
+
+### Zero Retention Mode
+Set `enable_logging=false`. PII is automatically redacted before storage. Gemini and Claude LLMs support Zero Retention.
+
+### PII Redaction (Enterprise)
+13 entity categories detected: Name, Contact, Personal, Credentials, Web, Organization, Financial, Location, Date, Unique IDs, Medical, plus specialized types. Transcripts: entities replaced with `[ENTITY_NAME]`; Audio: replaced with bleep sound.
+
+### Compliance
+- SOC2 certified
+- GDPR compliant
+- HIPAA BAAs available for qualifying healthcare enterprises
+- SSO/RBAC: Okta, Azure AD, Google Workspace integration
+
+### Burst Pricing
+Enable per-agent to handle up to 3x normal concurrency during peak demand. Excess calls charged at 2x standard rate.

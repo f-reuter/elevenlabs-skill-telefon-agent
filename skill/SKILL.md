@@ -27,6 +27,7 @@ ElevenLabs Conversational AI uses LLMs (Claude, GPT) as the reasoning engine, wi
 | Edit an agent via PATCH API / audit before deploy | `references/agent-api-operations.md` |
 | Design and structure knowledge bases (RAG) | `references/rag-strategy.md` |
 | Analyze conversations and improve agents | `references/conversation-analysis.md` |
+| Connect tools (CRM, Calendar, Ticketing) & secure them | `references/tools-and-security.md` |
 
 **Before writing any prompt or workflow, read the relevant reference files.** They contain the exact schemas, templates, anti-patterns, and examples you need.
 
@@ -155,15 +156,27 @@ Read `references/output-rules.md`. Apply to every subagent:
 4. Confirmation patterns
 5. Error recovery phrases
 
-### Step 6: Configure ElevenLabs Parameters
+### Step 6: Connect Tools & Integrations
+
+Read `references/tools-and-security.md`. For each subagent:
+1. Identify which tools this agent needs (CRM, calendar, ticketing, email)
+2. Configure server tools with proper authentication (OAuth2, Bearer, etc.)
+3. Store all API keys as workspace secrets — never hardcode
+4. Set error handling mode (`summarized` for production, never `passthrough`)
+5. Add tool usage rules to the system prompt (filler phrases, error recovery, no raw data)
+6. Configure tool call sounds to mask latency
+7. Run the tool security checklist before deployment
+
+### Step 7: Configure ElevenLabs Parameters
 
 Read `references/elevenlabs-config.md`. Set per subagent:
 - Temperature (0.2–0.3 for routing/data collection, 0.4–0.6 for conversational)
 - Max tokens (150–200 for voice)
 - Voice ID (consistent across workflow unless intentionally varied)
-- Tools/API connections (only what this specific agent needs)
+- Turn detection (eagerness, spelling patience, soft timeout per agent type)
+- LLM model (fast model for routing, accurate model for support)
 
-### Step 7: Test
+### Step 8: Test
 
 Read `references/testing.md`. Follow this order:
 1. Unit test each subagent in isolation

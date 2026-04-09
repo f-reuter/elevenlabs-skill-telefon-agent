@@ -104,15 +104,16 @@ Calculate across 20+ conversations:
 | **Stuck Rate** | Duration > 10min / Total | < 5% |
 | **First-Contact Resolution** | Resolved without callback / Total | > 60% |
 
-### Benchmark by Vertical
+### Benchmark by Agent Type
 
-| Vertical | Avg Duration | Completion Target | Transfer Target |
+| Agent Type | Avg Duration | Completion Target | Transfer Target |
 |---|---|---|---|
-| Apotheke (Empfang) | 1–2 min | 85% | 25% |
-| Arztpraxis (Terminvergabe) | 2–3 min | 80% | 20% |
-| Hausverwaltung (Schadensmeldung) | 3–5 min | 75% | 30% |
-| Steuerberater (Bearbeitungsstand) | 2–3 min | 70% | 35% |
-| B2B Software (Sales + Support) | 3–6 min | 70% | 40% |
+| Routing / Reception | 0.5–1.5 min | 90% | 15% |
+| Appointment Scheduling | 2–3 min | 80% | 20% |
+| Damage / Intake Reports | 3–5 min | 75% | 30% |
+| Sales / Lead Qualification | 3–6 min | 70% | 40% |
+| Technical Support | 4–8 min | 65% | 35% |
+| Complaint Handling | 3–5 min | 60% | 45% |
 
 ### Pattern Recognition
 

@@ -38,40 +38,6 @@ Never give every subagent access to every KB. A sales agent with access to the t
 | SLA & Policies | Service levels, refund, escalation rules | Complaint, Support | Sales |
 | FAQ | Common questions, general answers | Empfang, Sales | — |
 
-### Vertical-Specific KB Sets
-
-**Apotheke:**
-| KB | Content | Agents |
-|---|---|---|
-| Sortiment | OTC-Produkte, Verfügbarkeit, Lieferzeiten, PZN | Verfügbarkeit |
-| Services | Botendienst, Rezeptvorbestellung, Impfungen, Blutdruck | Empfang |
-| Notdienst | Regionale Notdienst-Daten, Aponet-Verweis | Empfang, Notdienst |
-| Öffnungszeiten | Regulär, Samstag, Feiertage, Sondertage | Empfang |
-
-**Arztpraxis:**
-| KB | Content | Agents |
-|---|---|---|
-| Terminplanung | Terminarten, Dauer, Verfügbarkeit, Vorbereitung | Terminvergabe |
-| Ärzte & Leistungen | Ärzte, Fachgebiete, Behandlungsangebot | Empfang |
-| Rezept-Ablauf | Folgerezept-Prozess, E-Rezept, Abholzeiten | Rezept & Überweisung |
-| Notfall-Info | 116117, 112, Notaufnahme | Empfang, Terminvergabe |
-
-**Hausverwaltung:**
-| KB | Content | Agents |
-|---|---|---|
-| Objektverzeichnis | Adressen, Hauswarte, Ansprechpartner | Empfang, Schadensmeldung |
-| Havarie & Notfall | Notfallnummern, Sofortmaßnahmen | Empfang, Schadensmeldung |
-| Nebenkostenprozess | Abrechnungsablauf, Fristen, Einspruch | Nebenkosten |
-| Allgemeines | Hausordnung, Müll, Schlüssel, Parkplätze | Empfang |
-
-**Steuerberater:**
-| KB | Content | Agents |
-|---|---|---|
-| Kanzlei-Info | Partner, Spezialisierungen, Anfahrt | Empfang |
-| Dokumenten-Checkliste | Unterlagen pro Erklärungsart | Dokumentenanfrage |
-| Mandanten-Status | Bearbeitungsstände (DATEV-Export) | Bearbeitungsstand |
-| Einreichungswege | DATEV Upload, Post, ELSTER | Empfang, Dokumentenanfrage |
-
 ---
 
 ## 3. Content Structuring for Voice RAG

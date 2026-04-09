@@ -4,7 +4,7 @@ Claude Code Skill zum automatisierten Erstellen professioneller ElevenLabs Conve
 
 ## Was ist das?
 
-Ein vollstaendiges Skill-Paket fuer Claude Code, das alle Templates, Guardrails, TTS-Regeln und Branchen-Vorlagen enthaelt, um **produktionsreife ElevenLabs Voice Agents** zu bauen. Claude lernt damit automatisch, wie man Telefon-Agenten richtig promptet, konfiguriert und testet.
+Ein vollstaendiges Skill-Paket fuer Claude Code, mit dem sich **produktionsreife ElevenLabs Voice Agents** fuer jede Branche und jeden Use Case bauen lassen. Claude lernt damit automatisch, wie man Telefon-Agenten richtig promptet, konfiguriert und testet -- unabhaengig von Branche oder Unternehmen.
 
 ## Projektstruktur
 
@@ -24,24 +24,6 @@ elevenlabs-skill-telefon-agent/
 |       |-- conversation-analysis.md # Gespraeche analysieren & Feedback-Loop
 |       |-- agent-api-operations.md # PATCH API, Audit Checklist, Outbound Safety
 |       |-- example-complete-prompt.md # Vollstaendig ausgefuelltes Beispiel (Sales Agent)
-|       |-- vertical-apotheke.md    # Branchen-Template: Apotheke
-|       |-- vertical-arztpraxis.md  # Branchen-Template: Arztpraxis
-|       |-- vertical-hausverwaltung.md # Branchen-Template: Hausverwaltung
-|       |-- vertical-steuerberater.md  # Branchen-Template: Steuerberater
-|
-|-- beispiele/                      # Referenz-Implementierungen
-|   |-- prompts/                    # Fertige Agent-Prompts
-|   |   |-- wianco-prompt-sophie.md # Routing Hub (Sophie)
-|   |   |-- wianco-prompt-sales.md  # Sales Agent (Laura)
-|   |   |-- wianco-prompt-support.md # Support Agent (Lisa) mit Auth
-|   |   |-- wianco-prompt-outbound.md # Outbound Agent (Umfragen/Follow-ups)
-|   |   |-- vertical-*.md          # Branchen-spezifische Prompts
-|   |-- knowledge-bases/            # KB-Templates & Zuordnungen
-|   |   |-- kb-template-apotheke.md     # Apotheken-KB (zum Ausfuellen)
-|   |   |-- kb-template-hausverwaltung.md # Hausverwaltungs-KB (zum Ausfuellen)
-|   |   |-- kb-wianco-zuordnung.md      # KB-Agent-Zuordnungsmatrix
-|   |-- workflow/
-|       |-- wianco-workflow.md      # Kompletter Workflow mit Transitions & Fallbacks
 |
 |-- mcp.json                        # ElevenLabs MCP Server Konfiguration
 ```
@@ -72,7 +54,7 @@ export ELEVENLABS_API_KEY="sk_dein_key_hier"
 
 Claude Code starten und sagen:
 
-> "Erstelle einen ElevenLabs Telefonagenten fuer eine Arztpraxis"
+> "Erstelle einen ElevenLabs Telefonagenten fuer [deine Branche/dein Unternehmen]"
 
 Claude laedt automatisch den Skill und baut einen kompletten Agenten mit Workflow, Prompts, Guardrails und Testszenarien.
 
@@ -80,29 +62,19 @@ Claude laedt automatisch den Skill und baut einen kompletten Agenten mit Workflo
 
 | Bereich | Details |
 |---------|---------|
-| **Prompt Engineering** | 10-Sektionen Schema, englischer System-Prompt mit deutscher Ausgabe |
+| **Prompt Engineering** | 10-Sektionen Schema, englischer System-Prompt mit Zielsprach-Ausgabe |
 | **Workflow Design** | Hub-and-Spoke, Linear Chain, Hybrid Topologien |
 | **Guardrails** | Topic, Behavioral, Data/Privacy (DSGVO) -- 3 Layer |
 | **TTS-Optimierung** | Abkuerzungen ausschreiben, keine URLs, Schachtelsaetze vermeiden |
 | **Knowledge Bases** | Atomic Facts, Voice-RAG Chunking, FAQ-Format |
 | **Testing** | Unit, Transition, End-to-End, Adversarial, Sprache/Dialekt |
 | **Konfiguration** | Temperature, Max Tokens, Voice, Turn Detection pro Agent-Typ |
-| **Branchen-Templates** | Apotheke, Arztpraxis, Hausverwaltung, Steuerberater |
 | **API Operations** | PATCH-Updates, Agent Audit Checklist, Outbound Safety |
 | **Conversation Analysis** | Performance Metrics, Feedback-Loop, Continuous Improvement |
 
-## Branchen-Vorlagen
-
-Fertige Vorlagen mit vorausgefuellten Workflows, Prompts, Guardrails und Test-Szenarien:
-
-- **Apotheke** -- Empfang, Verfuegbarkeit, Rezeptannahme, Notdienst
-- **Arztpraxis** -- Empfang, Terminvergabe, Rezept/Ueberweisung, Befundauskunft
-- **Hausverwaltung** -- Empfang, Schadensmeldung, Nebenkosten, Mietvertrag
-- **Steuerberater** -- Empfang, Terminvereinbarung, Dokumentenanfrage, Bearbeitungsstand
-
 ## Kern-Prinzipien
 
-1. **Englischer Prompt, deutsche Ausgabe** -- LLM-Reasoning funktioniert in Englisch zuverlaessiger
+1. **Englischer Prompt, Zielsprach-Ausgabe** -- LLM-Reasoning funktioniert in Englisch zuverlaessiger
 2. **Ein Subagent = Ein Job** -- Keine Multi-Responsibility Agents
 3. **Voice ≠ Chat** -- Max 2 Saetze pro Turn, keine Scroll-back-Moeglichkeit
 4. **Guardrails sind Pflicht** -- Topic, Behavioral, Data/Privacy fuer jeden Agent

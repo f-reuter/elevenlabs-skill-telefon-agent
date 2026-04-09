@@ -22,10 +22,6 @@ ElevenLabs Conversational AI uses LLMs (Claude, GPT) as the reasoning engine, wi
 | Design a multi-agent workflow | `references/workflow-design.md` |
 | Configure ElevenLabs parameters | `references/elevenlabs-config.md` |
 | Test and iterate | `references/testing.md` |
-| Build an agent for a **pharmacy** | `references/vertical-apotheke.md` |
-| Build an agent for a **medical practice** | `references/vertical-arztpraxis.md` |
-| Build an agent for **property management** | `references/vertical-hausverwaltung.md` |
-| Build an agent for a **tax advisor** | `references/vertical-steuerberater.md` |
 | Edit an agent via PATCH API / audit before deploy | `references/agent-api-operations.md` |
 | Design and structure knowledge bases (RAG) | `references/rag-strategy.md` |
 | Analyze conversations and improve agents | `references/conversation-analysis.md` |
@@ -135,7 +131,7 @@ Read `references/workflow-design.md`, then:
 
 ### Step 3: Write Subagent Prompts
 
-Read `references/prompt-template.md`. If the use case matches a known vertical (pharmacy, medical practice, property management, tax advisor), **start from the corresponding vertical template** (`references/vertical-*.md`) instead of from scratch. The vertical templates contain pre-built prompts, guardrails, transition conditions, KB recommendations, and test scenarios. Customize the `[PLACEHOLDERS]` per client. For each subagent:
+Read `references/prompt-template.md`. For each subagent:
 1. Fill in all 10 sections of the prompt template (never skip sections)
 2. Write the `first_message` in the target language
 3. Define transition conditions with positive AND negative examples

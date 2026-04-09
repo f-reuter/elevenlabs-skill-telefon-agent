@@ -196,3 +196,81 @@ Before deploying each subagent:
 - [ ] Tools are connected only where needed (no global tool access)
 - [ ] Knowledge base is assigned with relevant content only
 - [ ] Webhooks are configured for logging and post-call processing
+
+---
+
+## 9. MCP Server Configuration
+
+The ElevenLabs MCP server (`elevenlabs-mcp`) connects Claude Code directly to the ElevenLabs API.
+
+### Environment Variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `ELEVENLABS_API_KEY` | (required) | Your ElevenLabs API key |
+| `ELEVENLABS_MCP_OUTPUT_MODE` | `files` | How generated files are returned: `files` (save to disk), `resources` (return as MCP resources), `both` |
+| `ELEVENLABS_MCP_BASE_PATH` | `~/Desktop` | Base directory for file output |
+| `ELEVENLABS_API_RESIDENCY` | `us` | Data residency region (enterprise only) |
+
+### Available MCP Tools for Conversational AI
+
+| Tool | Purpose | Cost |
+|---|---|---|
+| `create_agent` | Create a new Conversational AI agent | Yes |
+| `get_agent` | Retrieve agent configuration | No |
+| `list_agents` | List all agents | No |
+| `add_knowledge_base_to_agent` | Attach KB (file, URL, or text) | Yes |
+| `list_conversations` | List agent conversations | No |
+| `get_conversation` | Get full transcript + metadata | No |
+| `search_voices` | Search user's voice library | No |
+| `search_voice_library` | Search entire ElevenLabs voice library | No |
+| `get_voice` | Get voice details | No |
+| `text_to_speech` | Generate speech from text | Yes |
+| `text_to_voice` | Create voice from description | Yes |
+| `voice_clone` | Clone voice from audio | Yes |
+| `make_outbound_call` | Place outbound call via agent | Yes |
+| `list_phone_numbers` | List available phone numbers | No |
+
+### Agent Creation via MCP — Conversation Config Structure
+
+When using `create_agent`, the MCP server internally builds this nested config:
+
+```json
+{
+  "conversation_config": {
+    "agent": {
+      "language": "de",
+      "prompt": {
+        "prompt": "System prompt here...",
+        "llm": "claude-3.5-sonnet",
+        "tools": [{"type": "system", "name": "end_call", "description": ""}],
+        "knowledge_base": [],
+        "temperature": 0.4,
+        "max_tokens": 150
+      },
+      "first_message": "Greeting here...",
+      "dynamic_variables": {"dynamic_variable_placeholders": {}}
+    },
+    "asr": {
+      "quality": "high",
+      "provider": "elevenlabs",
+      "keywords": ["domain-specific", "terms"]
+    },
+    "tts": {
+      "voice_id": "voice_id_here",
+      "model_id": "eleven_multilingual_v2",
+      "stability": 0.55,
+      "similarity_boost": 0.8,
+      "optimize_streaming_latency": 3
+    },
+    "turn": {
+      "turn_timeout": 7
+    },
+    "conversation": {
+      "max_duration_seconds": 600
+    }
+  }
+}
+```
+
+**Note:** The MCP `create_agent` tool does NOT support PATCH updates. To modify an existing agent, use the PATCH API directly via curl (see `agent-api-operations.md`).

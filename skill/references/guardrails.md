@@ -407,6 +407,8 @@ For every deployed agent, test these scenarios at minimum:
 
 # PART B: Platform-Level Guardrails (ElevenLabs Dashboard / API)
 
+> **Alpha Status (Stand April 2026):** Guardrails 2.0 ist aktuell im Alpha. Feature-Set, Defaults, Dashboard-Controls und API-Felder koennen sich vor dem General Availability Release noch aendern — auch mit Breaking Changes. Setup regelmaessig validieren und Logs ueberwachen.
+
 Platform guardrails run independently of the system prompt. They provide automated enforcement as a safety net — catching violations that prompt-level guardrails miss.
 
 **Best practice: Use BOTH.** Include critical rules in the system prompt AND as platform guardrails. This creates defense in depth.

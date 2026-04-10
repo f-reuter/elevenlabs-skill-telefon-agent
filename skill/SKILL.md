@@ -111,7 +111,97 @@ For a complete worked example showing all 10 sections assembled into one product
 
 ## Workflow: Building a New Agent System
 
-Follow this sequence when the user asks to build an ElevenLabs agent or workflow:
+Follow this sequence when the user asks to build an ElevenLabs agent or workflow.
+
+**IMPORTANT: Always start with Step 0. Never skip project selection.**
+
+### Step 0: Project Selection (ALWAYS FIRST)
+
+Before doing ANY work, you must establish which project the user is working in. Projects are stored at `~/.claude/elevenlabs-projects/`. Each project has its own folder with configuration, API key, and all agent-related artifacts.
+
+**On every conversation start, ask the user:**
+
+> "Möchtest du ein **neues Projekt** starten oder mit einem **bestehenden Projekt** weiterarbeiten?"
+
+#### Option A: New Project
+
+1. Ask for:
+   - **Project name** (becomes the folder name, use kebab-case, e.g. `zahnarzt-praxis-mueller`)
+   - **ElevenLabs API Key** for this project (`sk_...`)
+   - **Short description** (one sentence — what is this agent for?)
+   - **Company name** (optional)
+2. Create the project folder structure:
+
+```
+~/.claude/elevenlabs-projects/{project-name}/
+├── config.json          # API key, metadata, created date
+├── agents/              # Agent prompts and configs (created later)
+├── knowledge/           # KB documents and recommendations (created later)
+└── notes.md             # Project notes, decisions, open questions
+```
+
+3. Write `config.json`:
+
+```json
+{
+  "projectName": "Project Display Name",
+  "slug": "project-slug",
+  "description": "Short description of the project",
+  "company": "Company Name",
+  "apiKey": "sk_...",
+  "language": "de",
+  "createdAt": "2026-04-10",
+  "lastModified": "2026-04-10",
+  "agents": []
+}
+```
+
+4. Write initial `notes.md`:
+
+```markdown
+# {Project Name}
+
+**Company:** {Company}
+**Created:** {Date}
+**Description:** {Description}
+
+## Decisions
+
+## Open Questions
+
+## Agent Overview
+```
+
+5. Confirm to the user:
+   > "Projekt '{name}' wurde angelegt. Der API-Key ist gespeichert. Wir können jetzt mit der Agent-Erstellung starten."
+
+6. Set the `ELEVENLABS_API_KEY` environment variable for the current session to the project's API key before making any ElevenLabs MCP calls.
+
+#### Option B: Existing Project
+
+1. List all folders in `~/.claude/elevenlabs-projects/`
+2. For each folder, read `config.json` and show a summary:
+   > "Folgende Projekte existieren:"
+   > - **{Project Name}** — {Description} (zuletzt bearbeitet: {lastModified})
+3. Let the user pick a project
+4. Load the project's `config.json`
+5. Set the `ELEVENLABS_API_KEY` environment variable for the current session
+6. Read `notes.md` to get back up to speed on the project context
+7. Continue with whatever the user wants to do
+
+#### Project Context During Work
+
+While working within a project:
+- **Always use the project's API key** for ElevenLabs MCP calls (set via env var at session start)
+- **Save all agent prompts** to `agents/{agent-slug}.md` in the project folder
+- **Save workflow documentation** to `agents/workflow.md` in the project folder
+- **Update `config.json`** when agents are created or modified (update `agents` array and `lastModified`)
+- **Update `notes.md`** with key decisions and open questions
+- **Save KB recommendations** to `knowledge/recommendations.md`
+
+This ensures that when the user returns to the project later, all context is preserved and no information is lost between sessions.
+
+---
 
 ### Step 1: Understand the Use Case
 
@@ -199,6 +289,18 @@ When creating agents for the user, always deliver ALL of the following. Do not s
 6. **Knowledge base recommendations** — What content each agent needs access to, and what to explicitly exclude.
 7. **Configuration parameters** — Temperature, max_tokens, voice recommendations per subagent.
 8. **Test scenarios** — At minimum: happy path, 3 edge cases, and 3 guardrail tests per subagent.
+
+### Saving to Project (MANDATORY)
+
+After delivering the output, **always save all artifacts to the active project folder**:
+
+- Save each subagent prompt to `~/.claude/elevenlabs-projects/{project}/agents/{agent-slug}.md`
+- Save workflow documentation to `~/.claude/elevenlabs-projects/{project}/agents/workflow.md`
+- Save KB recommendations to `~/.claude/elevenlabs-projects/{project}/knowledge/recommendations.md`
+- Update `config.json` → add agents to the `agents` array, update `lastModified`
+- Update `notes.md` with key decisions from this session
+
+This ensures the user can pick up exactly where they left off in the next session.
 
 ---
 

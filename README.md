@@ -24,8 +24,20 @@ elevenlabs-skill-telefon-agent/
 |       |-- conversation-analysis.md # Gespraeche analysieren & Feedback-Loop
 |       |-- agent-api-operations.md # PATCH API, Audit Checklist, Outbound Safety
 |       |-- example-complete-prompt.md # Vollstaendig ausgefuelltes Beispiel (Sales Agent)
+|       |-- tools-and-security.md   # Tool-Integration & Sicherheit
 |
 |-- mcp.json                        # ElevenLabs MCP Server Konfiguration
+```
+
+### Laufzeit-Projektdaten (lokal, nicht im Repo)
+
+```
+~/.claude/elevenlabs-projects/      # Wird automatisch vom Skill verwaltet
+|-- {projekt-name}/
+|   |-- config.json                 # API-Key, Metadaten, Agent-Liste
+|   |-- agents/                     # Gespeicherte Agent-Prompts & Workflows
+|   |-- knowledge/                  # KB-Empfehlungen & Dokumente
+|   |-- notes.md                    # Projekt-Notizen & Entscheidungen
 ```
 
 ## Installation
@@ -56,7 +68,35 @@ Claude Code starten und sagen:
 
 > "Erstelle einen ElevenLabs Telefonagenten fuer [deine Branche/dein Unternehmen]"
 
-Claude laedt automatisch den Skill und baut einen kompletten Agenten mit Workflow, Prompts, Guardrails und Testszenarien.
+Claude fragt dich zuerst, ob du ein **neues Projekt** starten oder mit einem **bestehenden Projekt** weiterarbeiten moechtest. Jedes Projekt bekommt einen eigenen Ordner mit API-Key, Agent-Prompts und allen Konfigurationen.
+
+## Projekt-Verwaltung
+
+Der Skill verwaltet Projekte automatisch unter `~/.claude/elevenlabs-projects/`:
+
+```
+~/.claude/elevenlabs-projects/
+|-- zahnarzt-praxis-mueller/     # Projekt 1
+|   |-- config.json              # API-Key, Metadaten
+|   |-- agents/                  # Agent-Prompts & Workflow-Doku
+|   |   |-- workflow.md
+|   |   |-- router-agent.md
+|   |   |-- booking-agent.md
+|   |-- knowledge/               # KB-Empfehlungen & Dokumente
+|   |-- notes.md                 # Entscheidungen & offene Fragen
+|
+|-- immobilien-gmbh/             # Projekt 2
+|   |-- config.json
+|   |-- agents/
+|   |-- knowledge/
+|   |-- notes.md
+```
+
+**Vorteile:**
+- Jedes Projekt hat seinen eigenen ElevenLabs API-Key
+- Alle Prompts und Konfigurationen bleiben zwischen Sessions erhalten
+- Einfacher Wechsel zwischen Projekten
+- Kein Informationsverlust bei Gespraechswechsel
 
 ## Was der Skill abdeckt
 

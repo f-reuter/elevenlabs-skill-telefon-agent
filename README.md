@@ -25,6 +25,7 @@ elevenlabs-skill-telefon-agent/
 |       |-- agent-api-operations.md # PATCH API, Audit Checklist, Outbound Safety
 |       |-- example-complete-prompt.md # Vollstaendig ausgefuelltes Beispiel (Sales Agent)
 |       |-- tools-and-security.md   # Tool-Integration & Sicherheit
+|       |-- experiments.md          # A/B Testing & Experiments
 |
 |-- mcp.json                        # ElevenLabs MCP Server Konfiguration
 ```
@@ -110,7 +111,9 @@ Der Skill verwaltet Projekte automatisch unter `~/.claude/elevenlabs-projects/`:
 | **Testing** | Unit, Transition, End-to-End, Adversarial, Sprache/Dialekt |
 | **Konfiguration** | Temperature, Max Tokens, Voice, Turn Detection pro Agent-Typ |
 | **API Operations** | PATCH-Updates, Agent Audit Checklist, Outbound Safety |
-| **Conversation Analysis** | Performance Metrics, Feedback-Loop, Continuous Improvement |
+| **Conversation Analysis** | Performance Metrics, Success Evaluation, Data Collection, Semantic Search |
+| **Experiments** | A/B Testing, Variant-Management, Traffic Splitting, Metriken |
+| **Automated Testing** | Scenario Tests, Tool Call Tests, Simulation Tests, CLI Integration |
 
 ## Kern-Prinzipien
 

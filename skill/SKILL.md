@@ -26,8 +26,13 @@ ElevenLabs Conversational AI uses LLMs (Claude, GPT) as the reasoning engine, wi
 | Test and iterate | `references/testing.md` |
 | Edit an agent via PATCH API / audit before deploy | `references/agent-api-operations.md` |
 | Design and structure knowledge bases (RAG) | `references/rag-strategy.md` |
+| Upload KBs (file types, limits, API methods) | `references/rag-strategy.md` (Section 0) |
 | Analyze conversations and improve agents | `references/conversation-analysis.md` |
+| Set up success evaluation & data collection | `references/conversation-analysis.md` (Section 0) |
 | Connect tools (CRM, Calendar, Ticketing) & secure them | `references/tools-and-security.md` |
+| System tools (transfer, DTMF, language detect) | `references/tools-and-security.md` (Section 1.1) |
+| Run A/B tests / experiments on agents | `references/experiments.md` |
+| Create automated tests (scenario, tool, simulation) | `references/testing.md` (Section 6) |
 
 **Before writing any prompt or workflow, read the relevant reference files.** They contain the exact schemas, templates, anti-patterns, and examples you need.
 
@@ -274,6 +279,22 @@ Read `references/testing.md`. Follow this order:
 3. End-to-end scenario tests
 4. Adversarial / guardrail tests
 5. Language / dialect / edge case tests
+6. Create automated tests (scenario, tool call, simulation) for regression prevention
+
+### Step 9: Set Up Analysis & Experiments
+
+Read `references/conversation-analysis.md` (Section 0) and `references/experiments.md`.
+
+**Before going live:**
+1. Configure **success evaluation criteria** per agent (what counts as a successful call?)
+2. Configure **data collection** fields (caller name, issue category, resolution status)
+3. Enable **post-call webhooks** if feeding data to CRM/ticketing
+
+**After going live (with real traffic):**
+4. Analyze first 20+ conversations using the analysis methodology
+5. Identify top 3 improvement areas
+6. Create **experiment variants** to test changes (A/B test on 5-10% traffic)
+7. Promote winning variants based on evaluation data
 
 ---
 

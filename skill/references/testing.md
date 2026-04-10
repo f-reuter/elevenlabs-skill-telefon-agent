@@ -228,46 +228,243 @@ These scenarios specifically target guardrail boundaries. Every deployed agent M
 
 ---
 
-## 6. Automated Testing Framework
+## 6. Automated Testing Framework (Platform)
 
-ElevenLabs supports three automated test types. Use these alongside manual call testing.
+ElevenLabs provides three automated test types. Use these alongside manual call testing. Tests can be created from scratch OR from existing conversation history (turn real calls into repeatable test cases).
 
-### Test Types
+### Test Types Overview
 
-| Type | What It Tests | When to Use |
+| Type | What It Tests | Scope | When to Use |
+|---|---|---|---|
+| **Scenario (LLM)** | Agent response quality against criteria | Single-turn | After prompt changes — does the agent still answer correctly? |
+| **Tool Call** | Correct tool invocation with right parameters | Single action | After tool/webhook changes — does the agent call the right tool? |
+| **Simulation** | Full multi-turn conversation flow | End-to-end | Pre-deployment — does the full flow work? (Public Alpha) |
+
+---
+
+### 6.1 Scenario Tests (LLM Evaluation)
+
+An LLM evaluator compares the agent's actual response against your success criteria and examples. Single-turn evaluation only — use simulation testing for full conversations.
+
+**Creation — 4 Steps:**
+
+1. **Define scenario** — Provide the interaction context (multiple turns acceptable for setup/history)
+2. **Set success criteria** — Describe expected behavior, tone, and actions in plain language
+3. **Provide examples** — Supply both passing AND failing response examples to guide evaluation
+4. **Run test** — Execute and receive pass/fail assessment
+
+**Example — Routing Agent:**
+
+```
+Scenario:
+  User: "Meine Software stuerzt immer ab wenn ich exportiere."
+
+Success Criteria:
+  "The agent should classify this as a technical support issue and
+  route to the support agent. It should NOT attempt to troubleshoot
+  the issue itself."
+
+Passing Example:
+  "Das klingt nach einem technischen Problem. Ich verbinde Sie mit
+  unserem Support-Team, die koennen Ihnen direkt helfen."
+
+Failing Example:
+  "Haben Sie schon versucht, die Software neu zu installieren?
+  Das loest das Problem meistens."
+```
+
+**Example — Sales Agent:**
+
+```
+Scenario:
+  User: "Was kostet die Enterprise-Lizenz?"
+
+Success Criteria:
+  "The agent should provide the correct price from the knowledge base.
+  If the price is not in the KB, it should NOT guess but offer to
+  have someone follow up."
+
+Passing Example:
+  "Die Enterprise-Lizenz kostet ab neunhundertneunzig Euro netto
+  pro Monat. Soll ich Ihnen die Details per E-Mail schicken?"
+
+Failing Example:
+  "Ich schaetze, die Enterprise-Lizenz liegt bei etwa tausend Euro
+  pro Monat, aber da bin ich mir nicht ganz sicher."
+```
+
+---
+
+### 6.2 Tool Call Tests
+
+Validates that the agent calls the correct tool with the correct parameters in specific situations. Critical for transfers, lookups, and integrations.
+
+**Creation:**
+
+1. **Select tool** — Choose the expected tool (e.g., `transfer_to_number`, `search_contact`, `book_meeting`)
+2. **Define parameters** — Specify expected values using three validation methods
+3. **Configure variables** — Use dynamic placeholders for development testing
+4. **Run test** — Verify correct tool calls with proper parameters
+
+**Three Validation Methods:**
+
+| Method | How It Works | Use When |
 |---|---|---|
-| `llm` | Evaluates agent responses against expected output | After prompt changes — does the agent still answer correctly? |
-| `tool` | Verifies correct tool calls (name, params) | After tool/webhook changes — does the agent call the right tool? |
-| `simulation` | Full conversation simulation with configurable scenarios | Pre-deployment — does the full flow work end-to-end? |
+| **Exact Match** | Parameter must precisely match specified value | Phone numbers, IDs, fixed values |
+| **Regex Pattern** | Parameter must match a regex pattern | Email format, date format, number ranges |
+| **LLM Evaluation** | LLM assesses semantic correctness based on context | Natural language fields (issue summary, notes) |
 
-### Simulation Test Configuration
+**Example — Emergency Transfer:**
+
+```
+Scenario:
+  User: "Ich habe starke Schmerzen und brauche sofort einen Arzt!"
+
+Expected Tool: transfer_to_number
+Expected Parameters:
+  phone_number: "+49 30 12345678"  (Exact Match — emergency line)
+  reason: "Medical emergency"      (LLM Evaluation — semantic match)
+```
+
+**Example — Appointment Booking:**
+
+```
+Scenario:
+  User: "Ich moechte einen Termin am fuenfzehnten Mai um vierzehn Uhr."
+
+Expected Tool: book_meeting
+Expected Parameters:
+  date: "2026-05-15"               (Exact Match)
+  time: /^14:00(:00)?$/            (Regex — with or without seconds)
+  name: "caller's provided name"   (LLM Evaluation)
+```
+
+**Critical Tool Call Tests (must always pass):**
+
+| Scenario | Why Critical |
+|---|---|
+| Emergency transfer | Wrong number = life-threatening |
+| Sensitive data handling | Wrong tool = data leak |
+| Payment processing | Wrong parameters = wrong charge |
+| Escalation to human | Broken transfer = lost customer |
+
+---
+
+### 6.3 Simulation Tests (End-to-End)
+
+Full multi-turn conversation simulation with configurable scenarios. Currently in **public alpha**. Tests whether complete interactions achieve defined outcomes.
+
+**Creation:**
+
+1. **Define scenario** — Natural language description of user context, intent, and behavior
+2. **Set success condition** — What outcome counts as passing
+3. **Set max turns** — 1–50 turns (default: 5)
+4. **Review results** — Inspect full transcript and pass/fail determination
+
+**Configuration Options:**
+
+| Option | What It Does | Example |
+|---|---|---|
+| **Environment** | Test against specific environment (dev/staging/prod) | Test against staging tools |
+| **Chat history** | Start from a partial conversation to test recovery | Test agent picking up after transfer |
+| **Dynamic variables** | Inject test-specific values without modifying agent config | `customer_name: "Testuser Mueller"` |
+| **Tool mocking** | Control which tools return mock vs. live responses | Mock CRM, use real calendar |
+| **Mock fallback** | If mock not configured: call real tool or return error | Return error for safety |
+
+**Example — Full Booking Flow:**
 
 ```json
 {
   "test_type": "simulation",
-  "simulation_scenario": "Caller wants to schedule an appointment for next Wednesday. They are an existing patient named Mueller.",
-  "simulation_max_turns": 12,
-  "expected_outcome": "Agent collects name, date preference, and reason for visit, then confirms and closes."
+  "simulation_scenario": "Caller wants to schedule an appointment for next Wednesday afternoon. They are an existing patient named Mueller. They prefer 14:00 or 15:00. If neither is available, they want Thursday instead.",
+  "simulation_max_turns": 15,
+  "expected_outcome": "Agent collects name, confirms existing patient status, checks availability for Wednesday 14:00/15:00, offers alternatives if needed, confirms final appointment with date, time, and any preparation instructions.",
+  "dynamic_variables": {
+    "customer_name": "Herr Mueller",
+    "customer_status": "existing_patient"
+  },
+  "tool_mocking": {
+    "get_available_slots": {
+      "response": {"slots": ["14:00", "15:30", "16:00"]}
+    }
+  }
 }
 ```
 
-### Test Organization
+**Example — Complaint Escalation:**
 
-- Group tests into folders by agent and test category
-- Run tests after every prompt change, KB update, or config modification
-- Track pass/fail rates over time to detect regression
+```json
+{
+  "test_type": "simulation",
+  "simulation_scenario": "Caller is very upset about a billing error. They have been charged twice for their subscription. They start calm but get increasingly frustrated when the agent cannot immediately reverse the charge.",
+  "simulation_max_turns": 20,
+  "expected_outcome": "Agent acknowledges the issue, documents the complaint, does NOT promise a refund, and transfers to a human when the caller's frustration escalates."
+}
+```
 
-### Recommended Test Coverage per Agent
+---
+
+### 6.4 Running Tests
+
+**Three Execution Methods:**
+
+| Method | How | Use When |
+|---|---|---|
+| **Single test** | Click "Run" on individual test in dashboard | Quick check after a change |
+| **Test suite** | Click "Run All Tests" button | Pre-deployment validation |
+| **CLI** | `elevenlabs agents test <agent_id>` | CI/CD pipeline integration |
+
+**CLI Integration:**
+```bash
+# Run all tests for an agent
+elevenlabs agents test agent_abc123
+
+# Useful in CI/CD pipelines:
+# - Run after every prompt change
+# - Block deployment if tests fail
+# - Track pass/fail rates over time
+```
+
+### 6.5 Creating Tests from Conversations
+
+Turn real conversations into repeatable test cases:
+
+1. Find a conversation that demonstrates a specific behavior (use semantic search — see `conversation-analysis.md`)
+2. In the conversation view, click "Create Test"
+3. The platform pre-fills the scenario from the actual conversation
+4. Adjust success criteria and expected behavior
+5. Save as a permanent test case
+
+**Best practice:** After every P1 bug fix (hallucination, misrouting, guardrail breach), create a regression test from the conversation that revealed the issue.
+
+### 6.6 Recommended Test Coverage per Agent
 
 | Category | Min Tests | Focus |
 |---|---|---|
-| Happy path | 3 | Standard flow, all steps completed |
-| Edge cases | 5 | Out-of-order info, vague input, topic changes |
-| Guardrail tests | 5 | Manipulation, abuse, blocked topics, data privacy |
-| Tool call tests | 2 per tool | Correct tool, correct parameters |
-| Simulation tests | 3 | Full scenario end-to-end with realistic dialogue |
+| Happy path (scenario) | 3 | Standard flow, correct responses |
+| Edge cases (scenario) | 5 | Out-of-order info, vague input, topic changes |
+| Guardrail tests (scenario) | 5 | Manipulation, abuse, blocked topics, data privacy |
+| Tool call tests | 2 per tool | Correct tool, correct parameters, error cases |
+| Simulation tests | 3 | Full scenario end-to-end with realistic multi-turn dialogue |
+| Regression tests | 1 per bug fix | Prevent previously fixed issues from recurring |
 
-### Latency Testing
+### 6.7 Test Development Workflow
+
+```
+Write/modify prompt
+    ↓
+Run existing tests → Any failures? → Fix prompt → Re-run
+    ↓ (all pass)
+Write new tests for the change
+    ↓
+Run full test suite
+    ↓ (all pass)
+Deploy with confidence
+```
+
+---
+
+## 7. Latency Testing
 
 Measure and optimize end-to-end response time:
 

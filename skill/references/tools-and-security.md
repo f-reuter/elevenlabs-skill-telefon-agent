@@ -11,9 +11,62 @@ This reference covers how to connect external tools to ElevenLabs agents, how to
 | **Server Tools** (Webhooks) | ElevenLabs infra → your API | CRM lookup, calendar booking, ticketing, email |
 | **Client Tools** | User's browser/device | UI events, DOM manipulation, client-side logic |
 | **MCP Tools** | External MCP servers (SSE/HTTP) | Third-party MCP server capabilities |
-| **System Tools** | ElevenLabs platform (built-in) | End call, transfer, DTMF, voicemail detection |
+| **System Tools** | ElevenLabs platform (built-in) | End call, transfer, DTMF, voicemail detection, language detection, skip turn |
 
 **Rule:** Only connect tools to the specific subagent that needs them. Giving every agent access to every tool increases prompt complexity, response latency, and attack surface.
+
+### 1.1 System Tools — Complete Reference
+
+System tools are built into the ElevenLabs platform. No external configuration needed.
+
+| Tool | What It Does | When to Use |
+|---|---|---|
+| **End Call** | Agent disconnects the call programmatically | After final summary, abuse escalation, or max turn limit reached |
+| **Agent Transfer** | Transfers caller to another ElevenLabs subagent | Workflow routing between subagents (carries context payload) |
+| **Transfer to Number** | Routes call to external phone number or SIP URI | Human escalation, connecting to specific departments |
+| **Language Detection** | Automatically detects caller's language and switches agent language | Multilingual deployments where caller language is unknown |
+| **Skip Turn** | Agent pauses and waits for caller input without speaking | When the caller is mid-thought or providing lengthy information |
+| **Play Keypad Touch Tone (DTMF)** | Generates DTMF tones for automated phone system interaction | When the agent needs to navigate external IVR systems (e.g., pressing "1" for sales) |
+| **Voicemail Detection** | Detects voicemail greetings via LLM analysis, optionally leaves a message | Outbound calls — detect answering machines and leave structured voicemail |
+
+#### Language Detection — Setup
+
+Enable when your agent may receive calls in multiple languages:
+
+```
+Prompt instruction:
+"If the caller speaks a language other than German, use the language_detection
+tool to switch to their language. Supported languages: German, English, French.
+For unsupported languages, say: 'Leider kann ich nur Deutsch, Englisch und
+Franzoesisch. Darf ich Sie mit einem Kollegen verbinden?'"
+```
+
+**Best practice:** Set the primary language in agent config, use language detection as fallback. Don't rely solely on detection — it needs a few words of caller speech.
+
+#### Skip Turn — When to Use
+
+| Scenario | Without Skip Turn | With Skip Turn |
+|---|---|---|
+| Caller says "Moment, ich suche die Nummer..." | Agent interrupts with a question | Agent waits silently |
+| Caller provides long address | Agent cuts in after pause | Agent lets caller finish |
+| Caller is thinking | Agent fills silence with filler | Agent respects the pause |
+
+```
+Prompt instruction:
+"If the caller says 'Moment', 'Einen Augenblick', or indicates they are
+looking something up, use skip_turn to wait silently. Do not fill the
+silence with questions or filler phrases."
+```
+
+#### DTMF Tones — Outbound Use Case
+
+For agents that need to navigate external phone systems (e.g., calling a customer's bank to verify information):
+
+```
+"If the external system plays a menu ('Druecken Sie 1 fuer...'),
+use play_dtmf to send the appropriate tone. Never read DTMF tones
+aloud to the caller."
+```
 
 ---
 

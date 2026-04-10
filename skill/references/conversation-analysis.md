@@ -1,6 +1,86 @@
 # Conversation Analysis — Performance Review & Feedback Loop
 
-Analyzing real conversations is the only reliable way to improve voice agents. This reference defines how to retrieve, assess, and act on conversation data.
+Analyzing real conversations is the only reliable way to improve voice agents. This reference covers both the **ElevenLabs platform features** (automated evaluation, data collection, semantic search) and the **manual analysis methodology** for systematic improvement.
+
+---
+
+## 0. Platform Features — Automated Analysis
+
+ElevenLabs provides three built-in analysis features that run automatically on every conversation. Configure these BEFORE deployment so you have data from day one.
+
+### 0.1 Success Evaluation
+
+Automatically assess whether each conversation achieved its goals. The LLM evaluates every completed call against your custom criteria.
+
+**Setup:**
+1. Go to Agent → Analysis → Success Evaluation
+2. Define evaluation criteria in natural language
+3. The platform scores each conversation as success/partial/failure
+
+**Criteria Examples per Agent Type:**
+
+| Agent Type | Example Criteria |
+|---|---|
+| **Routing** | "The caller was routed to the correct department within 3 turns. The agent did not attempt to answer questions outside its scope." |
+| **Appointment Booking** | "The agent successfully collected the caller's name, preferred date, and reason for visit, and confirmed the appointment details back to the caller." |
+| **Sales / Lead Capture** | "The agent identified the caller's needs, presented relevant product information from the knowledge base, and either captured contact details or scheduled a follow-up." |
+| **Support** | "The caller's issue was resolved using information from the knowledge base, or the caller was transferred to the appropriate specialist with complete context." |
+| **Complaint** | "The agent acknowledged the caller's frustration, documented the complaint details, and provided a clear next step (callback, escalation, or resolution)." |
+
+**Best Practices:**
+- Write criteria as observable outcomes, not feelings ("agent collected name and email" not "agent was helpful")
+- Include both positive criteria (what should happen) AND negative criteria (what should NOT happen)
+- Set up criteria BEFORE running experiments — you need automated scoring for A/B tests (see `experiments.md`)
+
+### 0.2 Data Collection
+
+Automatically extract structured data from conversations. The platform pulls specified fields from every call without manual transcript review.
+
+**Setup:**
+1. Go to Agent → Analysis → Data Collection
+2. Define the fields you want extracted
+3. Data appears in the analytics dashboard and webhook payloads
+
+**Common Data Collection Fields:**
+
+| Field | Description | Example Value |
+|---|---|---|
+| `caller_name` | Full name of the caller | "Herr Mueller" |
+| `caller_email` | Email address if provided | "mueller@firma.de" |
+| `caller_phone` | Phone number if different from calling number | "+49 170 1234567" |
+| `caller_company` | Company name if mentioned | "AcmeSoft GmbH" |
+| `call_reason` | Primary reason for calling | "Terminbuchung" |
+| `issue_category` | Categorized issue type | "Billing / Rechnung" |
+| `resolution_status` | How the call ended | "Resolved / Transferred / Callback" |
+| `sentiment` | Caller mood assessment | "Positive / Neutral / Frustrated" |
+| `follow_up_required` | Whether action is needed | "Yes — callback by Friday" |
+| `products_discussed` | Products/services mentioned | "Enterprise Plan, Add-on Modul" |
+
+**Integration with Webhooks:**
+Data collection results are included in the `post_call_transcription` webhook payload under `analysis.data_collection_results`. Use this to automatically feed collected data into your CRM, ticketing system, or analytics pipeline.
+
+### 0.3 Semantic Conversation Search (Smart Search)
+
+Find conversations by keyword OR meaning across all conversation history. Available in the ElevenLabs Dashboard and via API.
+
+**What it does:**
+- **Keyword search:** Find conversations containing specific words ("Reklamation", "Termin")
+- **Semantic search:** Find conversations by meaning — e.g., searching "frustrated caller" finds calls where the caller expressed frustration even without using that exact word
+- **Cross-agent search:** Search across all agents in a workflow
+
+**Use Cases:**
+| Search | Finds |
+|---|---|
+| "Preisbeschwerde" | Calls about pricing complaints, even if caller said "zu teuer" |
+| "technisches Problem" | Support calls, even if caller described symptoms without using technical terms |
+| "Terminabsage" | Appointment cancellations, including "Ich kann doch nicht kommen" |
+| "veraergert" | Frustrated callers, including those who used different words for anger |
+
+**When to Use:**
+- Investigating specific issues reported by customers
+- Finding examples of a specific conversation pattern
+- Building test cases from real conversations (see `testing.md`)
+- Preparing for conversation analysis cycles
 
 ---
 
@@ -341,6 +421,13 @@ Delivered via chunked transfer encoding for large files. Configurable independen
 
 ---
 
-## 8. Smart Search — Semantic Conversation Search
+## 8. Integration with Experiments
 
-Find conversations by keyword OR meaning across all conversation history (semantic search). Available in the ElevenLabs Dashboard and via API. Use this to find patterns that keyword search misses — e.g., search for "frustrated caller" finds conversations where the caller expressed frustration even without using that exact word.
+Conversation analysis is the foundation for effective A/B testing (see `experiments.md`):
+
+1. **Baseline metrics** — Run analysis on current agent performance before creating experiment variants
+2. **Evaluation criteria** — Set up success evaluation (Section 0.1) before starting experiments
+3. **Variant comparison** — Use the analytics dashboard to compare success rates between variants
+4. **Data-driven decisions** — Promote variants that show measurable improvement in your evaluation criteria
+
+**Workflow:** Analyze current performance → Identify improvement area → Create experiment variant → Measure with evaluation criteria → Promote or discard

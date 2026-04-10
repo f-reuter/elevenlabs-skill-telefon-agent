@@ -4,6 +4,90 @@ Voice agents retrieve from knowledge bases differently than chatbots. Callers ca
 
 ---
 
+## 0. Platform Basics — File Types, Limits & Upload Methods
+
+### Supported File Types
+
+| Format | Notes |
+|---|---|
+| **PDF** | Most common. Ensure text is selectable (not scanned images) |
+| **TXT** | Plain text. Best for manually structured atomic facts |
+| **DOCX** | Word documents. Formatting stripped on import |
+| **HTML** | Web pages. Tags stripped, content extracted |
+| **EPUB** | E-books. Chapter structure preserved |
+
+### Size Limits
+
+- **Standard accounts:** Maximum **20 MB** or **300,000 characters** per knowledge base
+- **Enterprise plans:** Expanded capacity available
+
+### Three Upload Methods
+
+| Method | When to Use | MCP Tool / API |
+|---|---|---|
+| **File upload** | PDF, DOCX, HTML, EPUB, TXT from local disk | `add_knowledge_base_to_agent(input_file_path=...)` |
+| **URL import** | Documentation pages, product pages, blog posts | `add_knowledge_base_to_agent(url=...)` |
+| **Text entry** | Manually written atomic facts, FAQs, structured content | `add_knowledge_base_to_agent(text=...)` |
+
+### URL Import Limitations
+
+- Does **NOT** auto-scrape linked pages (single page only)
+- Does **NOT** continuously update when the source page changes
+- Verify you have permission to use imported content
+- For multi-page documentation: upload each page separately or export as single document
+
+### API / SDK Methods
+
+**Python:**
+```python
+from elevenlabs import ElevenLabs
+client = ElevenLabs(api_key="sk_...")
+
+# From text
+doc = client.conversational_ai.knowledge_base.create_from_text(
+    name="Preisliste 2026",
+    text="## Was kostet AcmeSoft?\nEine Lizenz kostet ab 490 Euro netto pro Monat."
+)
+
+# From URL
+doc = client.conversational_ai.knowledge_base.create_from_url(
+    name="Produktseite",
+    url="https://acmesoft.de/produkt"
+)
+
+# From file
+doc = client.conversational_ai.knowledge_base.create_from_file(
+    name="Technische Docs",
+    file=open("docs.pdf", "rb")
+)
+
+# Attach to agent
+client.conversational_ai.agents.update(
+    agent_id="agent_...",
+    knowledge_base=[{"type": "file", "name": "Preisliste 2026", "id": doc.id}]
+)
+```
+
+**JavaScript/TypeScript:**
+```javascript
+import { ElevenLabs } from 'elevenlabs';
+const client = new ElevenLabs({ apiKey: 'sk_...' });
+
+const doc = await client.conversationalAi.knowledgeBase.createFromText({
+  name: 'Preisliste 2026',
+  text: '## Was kostet AcmeSoft?\nEine Lizenz kostet ab 490 Euro netto pro Monat.'
+});
+```
+
+### KB Naming Convention
+
+Name knowledge bases with dates for traceability:
+- `Preisliste-2026-04` not `Preisliste`
+- `Notdienst-Q2-2026` not `Notdienst`
+- `FAQ-Produkt-v3` not `FAQ`
+
+---
+
 ## 1. When KB vs. System Prompt
 
 | Put in System Prompt | Put in Knowledge Base |
@@ -182,12 +266,6 @@ Nebenwirkungen darf der Agent NICHT beantworten.
 3. **Re-upload** via `add_knowledge_base_to_agent` (creates a new KB version)
 4. **Delete** the old KB version to avoid duplicate/conflicting retrievals
 5. **Test** with 3 questions that should retrieve updated content
-
-### KB Versioning
-
-Name KBs with dates for traceability:
-- `Preisliste-2026-04` not `Preisliste`
-- `Notdienst-Q2-2026` not `Notdienst`
 
 ---
 

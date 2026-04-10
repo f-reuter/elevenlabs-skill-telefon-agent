@@ -26,6 +26,10 @@ elevenlabs-skill-telefon-agent/
 |       |-- example-complete-prompt.md # Vollstaendig ausgefuelltes Beispiel (Sales Agent)
 |       |-- tools-and-security.md   # Tool-Integration & Sicherheit
 |       |-- experiments.md          # A/B Testing & Experiments
+|       |-- dynamic-variables.md   # Personalisierung & Runtime-Daten
+|       |-- pronunciation.md       # Aussprache-Woerterbuecher fuer TTS
+|       |-- privacy-retention.md   # Datenschutz, Retention & PII-Redaktion
+|       |-- expressive-mode.md     # v3 Conversational & emotionale Sprache
 |
 |-- mcp.json                        # ElevenLabs MCP Server Konfiguration
 ```
@@ -114,6 +118,15 @@ Der Skill verwaltet Projekte automatisch unter `~/.claude/elevenlabs-projects/`:
 | **Conversation Analysis** | Performance Metrics, Success Evaluation, Data Collection, Semantic Search |
 | **Experiments** | A/B Testing, Variant-Management, Traffic Splitting, Metriken |
 | **Automated Testing** | Scenario Tests, Tool Call Tests, Simulation Tests, CLI Integration |
+| **Dynamic Variables** | System-Variablen, Tool-Assignment, Secret Vars, Personalisierung |
+| **Pronunciation** | Aussprache-Woerterbuecher (Alias/IPA), deutsche Firmen- und Fachbegriffe |
+| **Privacy & Retention** | DSGVO-Konfiguration, PII-Redaktion, Audio Saving, Zero Retention |
+| **Expressive Mode** | v3 Conversational, emotionale Tags, Turn-Taking, Ton-Guidance |
+| **Platform Guardrails** | Focus, Manipulation, Content, Custom Guardrails, Execution Modes |
+| **Versioning** | Agent-Versionierung, Branching, Traffic Deployment |
+| **Cost Optimization** | Model-Rightsizing, Prompt-Optimierung, RAG-Effizienz |
+| **Environment Variables** | Dev/Staging/Prod Umgebungen, Template-Syntax |
+| **Multilingual** | Sprachkonfiguration, Voice pro Sprache, Language Detection |
 
 ## Kern-Prinzipien
 

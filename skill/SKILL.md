@@ -33,6 +33,15 @@ ElevenLabs Conversational AI uses LLMs (Claude, GPT) as the reasoning engine, wi
 | System tools (transfer, DTMF, language detect) | `references/tools-and-security.md` (Section 1.1) |
 | Run A/B tests / experiments on agents | `references/experiments.md` |
 | Create automated tests (scenario, tool, simulation) | `references/testing.md` (Section 6) |
+| Dynamic variables & personalization | `references/dynamic-variables.md` |
+| Pronunciation dictionaries for TTS | `references/pronunciation.md` |
+| Privacy, retention & PII redaction (DSGVO) | `references/privacy-retention.md` |
+| Expressive mode & emotional delivery (v3) | `references/expressive-mode.md` |
+| Platform guardrails (Focus, Manipulation, Custom) | `references/guardrails.md` (Part B) |
+| Environment variables (dev/staging/prod) | `references/elevenlabs-config.md` (Section 15) |
+| Multilingual agent configuration | `references/elevenlabs-config.md` (Section 16) |
+| Cost optimization strategies | `references/elevenlabs-config.md` (Section 17) |
+| Agent versioning & branching | `references/elevenlabs-config.md` (Section 18) |
 
 **Before writing any prompt or workflow, read the relevant reference files.** They contain the exact schemas, templates, anti-patterns, and examples you need.
 

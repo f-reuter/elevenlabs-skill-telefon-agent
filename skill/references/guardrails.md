@@ -1,6 +1,16 @@
-# Guardrails Reference — Three-Layer Protection System
+# Guardrails Reference — Prompt-Level + Platform-Level Protection
 
-Every ElevenLabs Conversational AI subagent requires three layers of guardrails. All guardrail instructions are written in **English** in the system prompt. Deflection phrases spoken to the caller are in the **target language**.
+ElevenLabs agents are protected at TWO levels:
+1. **Prompt-level guardrails** — Rules written into the system prompt (Layers 1-3 below)
+2. **Platform-level guardrails** — Automated enforcement via the ElevenLabs platform (Section 4 below)
+
+Both levels are complementary. Use BOTH for defense in depth — if the LLM drifts from its prompt instructions, the platform guardrails catch violations before delivery.
+
+---
+
+# PART A: Prompt-Level Guardrails (System Prompt)
+
+All guardrail instructions are written in **English** in the system prompt. Deflection phrases spoken to the caller are in the **target language**. Models pay extra attention to content under the `# Guardrails` heading — use it for your most critical rules.
 
 ---
 
@@ -392,3 +402,170 @@ For every deployed agent, test these scenarios at minimum:
 4. Ask "Welche Daten haben Sie über mich gespeichert?" (DSGVO Art. 15)
 5. Provide failed verification credentials and check the response doesn't reveal valid formats
 6. Share unsolicited health information and verify the agent doesn't process it
+
+---
+
+# PART B: Platform-Level Guardrails (ElevenLabs Dashboard / API)
+
+Platform guardrails run independently of the system prompt. They provide automated enforcement as a safety net — catching violations that prompt-level guardrails miss.
+
+**Best practice: Use BOTH.** Include critical rules in the system prompt AND as platform guardrails. This creates defense in depth.
+
+---
+
+## 4. Platform Guardrail Types
+
+| Guardrail | What It Does | Protection Layer | Latency | Cost | Exit Strategy |
+|---|---|---|---|---|---|
+| **Focus** | Reinforces system prompt, keeps agent on-topic | System prompt hardening | Minimal | Included | N/A |
+| **Manipulation** | Detects prompt injection in user input | User input validation | None | Included | Terminates conversation |
+| **Content** | Flags inappropriate content in agent responses | Agent response validation | Depends on execution mode | Included | Configurable |
+| **Custom** | Enforces business-specific policies (natural language rules) | Agent response validation | Depends on execution mode | Usage-based | Configurable |
+
+### 4.1 Focus Guardrail
+
+Reinforces the system prompt throughout the conversation. Prevents drift in long or complex conversations.
+
+**Always enable this.** No latency cost, no additional pricing.
+
+### 4.2 Manipulation Guardrail
+
+Detects prompt injection and manipulation attempts in user input BEFORE the agent responds. Terminates the conversation when a security risk is detected.
+
+**Always enable this.** Critical for public-facing phone agents.
+
+### 4.3 Content Guardrail
+
+Flags and prevents inappropriate content (politically sensitive, sexually explicit, violent) in agent responses before delivery. Configurable execution mode and exit strategy.
+
+### 4.4 Custom Guardrails
+
+LLM-based rules using natural language prompts. Define business-specific blocking criteria.
+
+**Examples per industry:**
+
+| Industry | Custom Guardrail Prompt |
+|---|---|
+| **Healthcare** | "Block any content that diagnoses conditions, recommends treatments, or provides dosage information." |
+| **Finance** | "Block any content that provides specific investment advice, financial recommendations, or tax guidance." |
+| **Legal** | "Block any content that constitutes legal advice or interprets specific laws for the caller's situation." |
+| **Retail** | "Block issuing refunds, credits, or discount codes unless eligibility is confirmed via tools." |
+| **Insurance** | "Block making coverage decisions or confirming claim amounts without verification through the claims tool." |
+
+**Configuration per custom guardrail:**
+
+| Field | Description |
+|---|---|
+| **Name** | Descriptive label (e.g., "No medical advice") |
+| **Prompt** | Natural language blocking instruction |
+| **Execution mode** | `streaming` (default) or `blocking` |
+| **Trigger action** | `end_call` (default) or `retry` |
+
+Custom guardrails can be individually toggled without deletion. Multiple run in parallel.
+
+---
+
+## 5. Execution Modes
+
+| Mode | How It Works | Latency | Recommended For |
+|---|---|---|---|
+| **Streaming** | Response may begin before guardrail evaluation completes. If violation detected, call ends (up to ~500ms of audio may have been delivered). | None added | **Voice agents** (phone) |
+| **Blocking** | Agent waits for guardrail evaluation before responding. | +200-500ms | **Text agents** (chat) |
+
+**For phone agents: Use streaming mode.** The 200-500ms delay from blocking mode is noticeable in voice conversations.
+
+---
+
+## 6. Exit Strategies
+
+| Strategy | Behavior | Available In |
+|---|---|---|
+| **`end_call`** (default) | Ends call immediately. Violation logged. Caller can start new conversation. | Streaming + Blocking |
+| **`retry`** | Regenerates response using feedback. Up to 3 attempts, then ends call. | Blocking only |
+
+### Retry Feedback Templates
+
+When using `retry`, configure feedback text to steer the model's next attempt. Use placeholders:
+
+| Placeholder | Replaced With |
+|---|---|
+| `{{trigger_reason}}` | The guardrail's prompt/category that caused the block |
+| `{{agent_message}}` | The agent output that was blocked |
+
+**Template examples:**
+
+**Generic refusal:**
+```
+Your response was blocked by a guardrail: '{{trigger_reason}}'.
+During your next turn, tell the user:
+"Es tut mir leid, dazu kann ich Ihnen leider keine Auskunft geben.
+Kann ich Ihnen bei etwas anderem helfen?"
+```
+
+**Transfer to human:**
+```
+Your response was blocked: '{{trigger_reason}}'.
+During your next turn, you MUST transfer the call using
+transfer_to_number. Say: "Ich verbinde Sie mit einem Kollegen,
+der Ihnen hier weiterhelfen kann."
+```
+
+**Transfer to specialist agent:**
+```
+Your response was blocked: '{{trigger_reason}}'.
+Use the transfer_to_agent tool to transfer to the appropriate
+specialist agent.
+```
+
+**Warning for voice agents:** Retry in blocking mode can behave unpredictably on voice. Validate thoroughly or use `end_call` until confident.
+
+---
+
+## 7. API Configuration
+
+```python
+from elevenlabs import ElevenLabs
+
+client = ElevenLabs(api_key="sk_...")
+
+agent = client.conversational_ai.agents.create(
+    name="Support Agent",
+    conversation_config={...},
+    platform_settings={
+        "guardrails": {
+            "version": "1",
+            "prompt_injection": {
+                "isEnabled": True
+            },
+            "custom": {
+                "config": {
+                    "configs": [
+                        {
+                            "is_enabled": True,
+                            "name": "No medical advice",
+                            "prompt": "Block any content that diagnoses conditions or recommends treatments.",
+                            "execution_mode": "streaming",
+                            "trigger_action": {
+                                "type": "end_call"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    }
+)
+```
+
+---
+
+## 8. Platform Guardrail Deployment Checklist
+
+- [ ] Focus guardrail: ENABLED (always)
+- [ ] Manipulation guardrail: ENABLED (always for public-facing agents)
+- [ ] Content guardrail: ENABLED with streaming mode
+- [ ] Custom guardrails: Defined for industry-specific rules
+- [ ] Execution mode: Streaming for voice, blocking for text
+- [ ] Exit strategy: `end_call` for voice (default), `retry` only if validated
+- [ ] Critical rules: Present in BOTH system prompt AND custom guardrails
+- [ ] Tested: Normal flows, edge cases, and adversarial prompts

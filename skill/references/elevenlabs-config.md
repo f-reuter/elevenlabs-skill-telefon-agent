@@ -408,3 +408,164 @@ Set `enable_logging=false`. PII is automatically redacted before storage. Gemini
 
 ### Burst Pricing
 Enable per-agent to handle up to 3x normal concurrency during peak demand. Excess calls charged at 2x standard rate.
+
+---
+
+## 15. Environment Variables (Dev/Staging/Prod)
+
+Workspace-scoped variables that resolve differently per environment. Eliminates the need to duplicate agents.
+
+### Types
+
+| Type | Description | Example |
+|---|---|---|
+| **String** | Plain text value | API base URL |
+| **Secret** | References workspace secret | API key |
+| **Auth connection** | References OAuth2/JWT auth | Salesforce token |
+
+### Template Syntax
+
+Use `{{system_env__<label>}}` in tool URLs, headers, auth connections, MCP server configs, and custom LLM configurations.
+
+```
+Tool URL: https://{{system_env__api_base}}/v1/contacts
+Tool header: Authorization: Bearer {{system_env__api_token}}
+```
+
+**Important:** URLs must start with `https://` BEFORE any env var reference.
+
+### Fallback Behavior
+
+If no value exists for the requested environment, falls back to the **production** value. Always define a production value.
+
+### Specifying Environment at Conversation Start
+
+| Channel | How |
+|---|---|
+| WebSocket | `environment=staging` as query parameter |
+| WebRTC (Signed URL) | Pass `environment` parameter when requesting token |
+| SDK | Pass `environment` parameter |
+| Dashboard | Always uses production |
+
+Environment is set at conversation start and persists for the entire conversation.
+
+### Location
+
+Dashboard → **Developers** → **Environment Variables**.
+
+---
+
+## 16. Multilingual Agent Configuration
+
+### Adding Languages
+
+1. Default: English with Flash v2 model
+2. Adding languages auto-switches to **Multilingual v2.5** model (English stays on Flash v2)
+3. "All" option supports 31 languages (~90% of world population)
+
+### Per-Language Configuration
+
+Each language can have:
+- **Its own voice** (select voices trained in that language)
+- **Custom first message** (auto-translated by LLM — review manually for accuracy)
+
+### Critical Constraint
+
+**Language is FIXED for the duration of a call.** Cannot switch mid-conversation.
+
+For automatic language detection: use the **Language Detection** system tool (see `tools-and-security.md`).
+
+### Best Practices
+
+- Select voices specifically trained in target languages
+- Review auto-translated first messages for accuracy and cultural tone
+- Adapt formal/informal address per culture (German: "Sie" default; French: "vous")
+- Test each language separately to ensure quality
+
+---
+
+## 17. Cost Optimization
+
+### Cost Drivers
+
+| Factor | Impact |
+|---|---|
+| Input tokens (prompt + history + KB) | Main cost driver |
+| Output tokens (agent responses) | Secondary cost driver |
+| Model choice | Per-token pricing varies significantly |
+| Silent periods | Billed at 5% of normal rate |
+
+### Optimization Checklist
+
+| Technique | How | Impact |
+|---|---|---|
+| **Model right-sizing** | Use cheapest model that works (e.g., Gemini Flash for routing) | Major |
+| **Prompt conciseness** | Remove filler, be specific, instruct output length | Major |
+| **Agent transfer** | Split large prompts into specialized smaller agents | Major |
+| **RAG over prompt** | Move facts to KB instead of embedding in prompt | Major |
+| **Tool offloading** | Delegate deterministic tasks to APIs | Medium |
+| **History management** | Summarize or use sliding window instead of full transcript | Medium |
+| **`max_tokens`** | Set conservatively (150-200 for voice) | Medium |
+| **Fewer KBs** | Consolidate related content, reduce retrieval overhead | Minor |
+
+### Cost-Effective Model Selection
+
+| Agent Type | Recommended Model | Why |
+|---|---|---|
+| Routing / Reception | Gemini 2.0 Flash Lite | Cheapest, fast enough for classification |
+| FAQ / Simple Support | Gemini 2.0 Flash | Good balance of cost and capability |
+| Complex Support | GPT-4o | Needs reasoning but not the most expensive |
+| Compliance-Critical | Claude Sonnet 4/4.5 | Best reasoning, worth the cost for accuracy |
+
+---
+
+## 18. Agent Versioning
+
+Git-like versioning system for agents. Enables A/B testing (see `experiments.md`).
+
+### Key Concepts
+
+| Concept | Description |
+|---|---|
+| **Version** | Immutable snapshot of agent config (`agtvrsn_xxxx`) |
+| **Branch** | Isolated line of development (`agtbrch_xxxx`) |
+| **Main** | Default branch, immutable — every agent has one |
+| **Draft** | Per-user, per-branch working changes (auto-discarded on commit/merge) |
+
+### Enabling
+
+```python
+# On creation
+agent = client.conversational_ai.agents.create(
+    name="Agent",
+    enable_versioning=True, ...
+)
+
+# On existing agent
+client.conversational_ai.agents.update(
+    agent_id="agent_...",
+    enable_versioning_if_not_enabled=True
+)
+```
+
+**Warning:** Once enabled, versioning cannot be disabled.
+
+### Workflow
+
+```
+Create branch from main → Make changes → Commit → Deploy traffic → Measure → Merge or discard
+```
+
+- Branches can only be created from main branch versions
+- Traffic splitting must total exactly 100%
+- Merging only goes into main branch
+- See `experiments.md` for A/B testing workflow
+
+### What's Versioned vs. Shared
+
+| Versioned (per-branch) | Shared (across branches) |
+|---|---|
+| Conversation config | Auth settings |
+| Platform settings (evaluation, guardrails) | Call limits |
+| Workflow | Privacy settings |
+| Widget config | Ban lists |
